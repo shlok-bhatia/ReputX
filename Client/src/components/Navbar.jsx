@@ -10,7 +10,7 @@ export default function Navbar({ onConnectClick }) {
 
   const navLinks = [
     { path: '/', label: 'Home' },
-    { path: '/leaderboard', label: 'Leaderboard' },
+    // { path: '/leaderboard', label: 'Leaderboard' },
     { path: '/profile', label: 'Profile' },
   ];
 

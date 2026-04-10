@@ -25,10 +25,10 @@ export default function Home({ onConnectClick }) {
             Your Wallet is Your<br />
             <span>Reputation</span>
           </h1>
-          <p className="hero__subtext">
+          {/* <p className="hero__subtext">
             Analyze on-chain activity. Build trust. Unlock Web3 with a decentralized identity
             score that reflects your true contribution to the ecosystem.
-          </p>
+          </p> */}
           <div className="hero__actions">
             <button className="btn-primary" id="hero-connect-btn" onClick={onConnectClick}>
               Connect Wallet →
