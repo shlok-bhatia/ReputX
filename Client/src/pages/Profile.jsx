@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import ScoreCard from '../components/ScoreCard';
 import BadgeShelf from '../components/BadgeShelf';
 import ProfileToggle from '../components/ProfileToggle';
 import { useWalletContext } from '../context/WalletContext';
+import { useAuth } from '../context/AuthContext';
 import { useReputation } from '../hooks/useReputation';
 import { formatAddress } from '../config/formatAddress';
+import api from '../config/axios';
 import './Profile.css';
 
-const STATS = [
-  { icon: '🔄', label: 'Transactions', value: '1,240', colorClass: 'stat-card__icon--tx' },
-  { icon: '🖼️', label: 'NFTs Held',     value: '42',    colorClass: 'stat-card__icon--nft' },
-  { icon: '🗳️', label: 'DAO Votes',     value: '15',    colorClass: 'stat-card__icon--dao' },
-  { icon: '📜', label: 'Contracts',     value: '88',    colorClass: 'stat-card__icon--con' },
+const STATS_TEMPLATE = [
+  { icon: '🔄', label: 'Transactions', key: 'transactionCount', fallback: '1,240', colorClass: 'stat-card__icon--tx' },
+  { icon: '🖼️', label: 'NFTs Held',     key: 'nftHoldings',      fallback: '42',    colorClass: 'stat-card__icon--nft' },
+  { icon: '🗳️', label: 'DAO Votes',     key: 'daoVotes',         fallback: '15',    colorClass: 'stat-card__icon--dao' },
+  { icon: '📜', label: 'Contracts',     key: 'uniqueContracts',  fallback: '88',    colorClass: 'stat-card__icon--con' },
 ];
 
 const TIMELINE = [
@@ -22,13 +24,40 @@ const TIMELINE = [
 
 export default function Profile() {
   const { walletAddress, ensName } = useWalletContext();
-  const { data } = useReputation(walletAddress);
+  const { isAuthenticated } = useAuth();
+  const { data, loading } = useReputation(walletAddress);
   const [isPublic, setIsPublic] = useState(false);
+  const [privacyUpdating, setPrivacyUpdating] = useState(false);
 
   const score  = data?.score || 742;
   const tier   = data?.tier  || 'Trusted';
   const badges = data?.badges || ['DAO Voter', 'ENS Holder', 'OG Wallet'];
   const sybil  = data?.sybilRisk || 'LOW';
+  const breakdown = data?.breakdown || {};
+
+  // Build stats from breakdown data
+  const stats = STATS_TEMPLATE.map(s => ({
+    ...s,
+    value: breakdown[s.key] != null ? String(breakdown[s.key]) : s.fallback,
+  }));
+
+  // Toggle profile visibility via API
+  const handleVisibilityToggle = useCallback(async (newValue) => {
+    setIsPublic(newValue);
+
+    if (!isAuthenticated) return;
+
+    setPrivacyUpdating(true);
+    try {
+      await api.put('/profile/visibility', { isPublic: newValue });
+    } catch (err) {
+      console.warn('[Profile] Failed to update visibility:', err.message);
+      // Revert on failure
+      setIsPublic(!newValue);
+    } finally {
+      setPrivacyUpdating(false);
+    }
+  }, [isAuthenticated]);
 
   return (
     <div className="profile-page" id="profile-page">
@@ -38,11 +67,12 @@ export default function Profile() {
           <span className="trust-velocity-card__label">Reputation Score</span>
           <ScoreCard score={score} size={200} strokeWidth={8} />
           <div className="trust-velocity-card__tier">{tier}</div>
+          {loading && <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: 8 }}>Loading from chain...</div>}
         </div>
 
         {/* ── Stats Row ── */}
         <div className="stats-row">
-          {STATS.map(({ icon, label, value, colorClass }, i) => (
+          {stats.map(({ icon, label, value, colorClass }, i) => (
             <div
               className="stat-card"
               key={label}
@@ -89,7 +119,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <ProfileToggle isPublic={isPublic} onToggle={setIsPublic} />
+          <ProfileToggle isPublic={isPublic} onToggle={handleVisibilityToggle} />
         </div>
 
         {/* ── Timeline ── */}
