@@ -73,36 +73,9 @@ export default function Profile() {
 
   return (
     <>
-<<<<<<< HEAD
       {!isAuthenticated && <WalletConnect hideClose={true} onClose={() => {}} />}
       <div className="profile-page" id="profile-page" style={!isAuthenticated ? { filter: 'blur(8px)', maxHeight: '100vh', overflow: 'hidden' } : {}}>
         <div className="profile-content" style={!isAuthenticated ? { pointerEvents: 'none' } : {}}>
-=======
-    {showModal && (
-  <div className="modal-overlay">
-    <div className="modal">
-      <h2>Connect Your Wallet</h2>
-      <p>To view your on-chain reputation score</p>
-
-      <button
-        className="btn-primary"
-        onClick={() => {
-          setShowModal(false);
-          onConnectClick();
-        }}
-      >
-        Connect Wallet
-      </button>
-
-      <button className="modal-close" onClick={() => setShowModal(false)}>
-        Skip
-      </button>
-    </div>
-  </div>
-)}
-    <div className="profile-page" id="profile-page">
-      <div className="profile-content">
->>>>>>> 4fa9228efd6e269f6ebc1b9aac3dc435c3db491c
         {/* ── Trust Velocity (Score Ring) ── */}
         <div className="trust-velocity-card">
           <span className="trust-velocity-card__label">Reputation Score</span>

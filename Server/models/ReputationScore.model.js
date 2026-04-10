@@ -22,13 +22,8 @@ const reputationScoreSchema = new mongoose.Schema(
       default: "Anon",
     },
     breakdown: {
-      walletAge: { type: Number, default: 0 },
-      transactionCount: { type: Number, default: 0 },
-      uniqueContracts: { type: Number, default: 0 },
-      nftHoldings: { type: Number, default: 0 },
-      daoVotes: { type: Number, default: 0 },
-      ensName: { type: Number, default: 0 },
-      cleanRecord: { type: Number, default: 0 },
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
     sybilRisk: {
       type: String,

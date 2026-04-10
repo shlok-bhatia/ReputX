@@ -9,6 +9,8 @@ const BADGE_TYPES = [
   "CLEAN_RECORD",
   "MULTI_CHAIN",
   "DAO_FOUNDER",
+  "VERIFIED_HUMAN",
+  "PLATINUM",
 ];
 
 const badgeSchema = new mongoose.Schema(
