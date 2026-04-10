@@ -36,7 +36,7 @@ export default function LeaderBoard() {
       setLoading(true);
       try {
         const limit = activeFilter === 'Top 10' ? 10 : 100;
-        const res = await api.get(`/profile/leaderboard?limit=${limit}&page=1`);
+        const res = await api.get(`/api/profile/leaderboard?limit=${limit}&page=1`);
         const { leaderboard } = res.data;
 
         if (!cancelled && leaderboard?.length > 0) {

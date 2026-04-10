@@ -21,7 +21,7 @@ const MOCK_SCORE = {
 };
 
 /**
- * Fetches the reputation score for a given address from the backend.
+ * Fetches the reputation score AND badges for a given address from the backend.
  * Falls back to mock data if the API is unavailable.
  */
 export function useReputation(address) {
@@ -34,8 +34,22 @@ export function useReputation(address) {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get(`/reputation/${address}`);
-      const apiData = res.data;
+      // Fetch reputation score and badges in parallel
+      const [scoreRes, badgeRes] = await Promise.allSettled([
+        api.get(`/api/reputation/${address}`),
+        api.get(`/api/badges/${address}`),
+      ]);
+
+      const apiData = scoreRes.status === 'fulfilled' ? scoreRes.value.data : null;
+      const badgeData = badgeRes.status === 'fulfilled' ? badgeRes.value.data : null;
+
+      if (!apiData) {
+        // Both failed — fall back to mock
+        throw new Error('Reputation API unavailable');
+      }
+
+      // Map badge types from API to display labels
+      const badgeLabels = badgeData?.badges?.map(b => b.label || b.type) || [];
 
       // Normalise API response to match component expectations
       setData({
@@ -43,7 +57,7 @@ export function useReputation(address) {
         tier: apiData.tier,
         breakdown: apiData.breakdown || {},
         sybilRisk: apiData.sybilRisk || 'NONE',
-        badges: apiData.badges || [],
+        badges: badgeLabels,
         fromCache: apiData.fromCache,
         cachedAt: apiData.cachedAt,
       });
@@ -61,5 +75,19 @@ export function useReputation(address) {
     fetchReputation();
   }, [fetchReputation]);
 
-  return { data, loading, error, refetch: fetchReputation };
+  /**
+   * Apply a real-time score update from Socket.io
+   */
+  const applyRealtimeUpdate = useCallback((update) => {
+    setData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        score: update.score ?? prev.score,
+        tier: update.tier ?? prev.tier,
+      };
+    });
+  }, []);
+
+  return { data, loading, error, refetch: fetchReputation, applyRealtimeUpdate };
 }

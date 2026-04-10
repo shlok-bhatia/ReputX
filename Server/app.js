@@ -46,11 +46,11 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Mount routes
-app.use("/auth", authRoutes);
-app.use("/reputation", reputationRoutes);
-app.use("/profile", profileRoutes);
-app.use("/badges", badgeRoutes);
+// Mount routes under /api prefix to avoid clashing with frontend SPA routes
+app.use("/api/auth", authRoutes);
+app.use("/api/reputation", reputationRoutes);
+app.use("/api/profile", profileRoutes);
+app.use("/api/badges", badgeRoutes);
 
 // Public third-party API endpoint
 // app.get("/api/score/:address", publicApiLimiter, publicScoreAPI);

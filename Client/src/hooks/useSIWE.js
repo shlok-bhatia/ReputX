@@ -18,7 +18,7 @@ export function useSIWE() {
 
     try {
       // Step 1 — fetch nonce and message from backend
-      const { data: nonceData } = await api.get(`/auth/nonce?address=${address}`);
+      const { data: nonceData } = await api.get(`/api/auth/nonce?address=${address}`);
       const nonce = nonceData.nonce;
       const message = nonceData.message;
 
@@ -42,7 +42,7 @@ export function useSIWE() {
       }
 
       // Step 3 — verify signature with backend
-      const { data: verifyData } = await api.post('/auth/verify', {
+      const { data: verifyData } = await api.post('/api/auth/verify', {
         address,
         signature,
       });

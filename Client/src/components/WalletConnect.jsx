@@ -26,6 +26,7 @@ export default function WalletConnect({ onClose }) {
     setAuthError(null);
 
     try {
+<<<<<<< HEAD
       // Step 1 — connect wallet
       const returnedAddress = await connect();
 
@@ -33,16 +34,28 @@ export default function WalletConnect({ onClose }) {
       let address = returnedAddress || walletAddress;
       if (!address && window.ethereum) {
         const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+=======
+      // Step 1 — connect wallet and get the address directly
+      // connect() returns the address, avoiding the stale state race condition
+      let address;
+
+      if (window.ethereum) {
+        const accounts = await window.ethereum.request({
+          method: 'eth_requestAccounts',
+        });
+>>>>>>> 5c193f287d1478db754be93b97da2e4114a5ffa2
         address = accounts[0];
-      }
-      if (!address) {
+      } else {
         address = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F'; // mock fallback
       }
 
-      // Step 2 — SIWE authentication
+      // Update wallet context with the resolved address
+      await connect(address);
+
+      // Step 2 — SIWE authentication using the resolved address (not stale state)
       const result = await signIn(address);
       if (result?.token) {
-        login(result.token, result.address);
+        login(result.token, result.address || address);
       }
       // Even if SIWE fails, wallet is still connected — user can browse with mock data
     } catch (err) {

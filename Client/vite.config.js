@@ -7,23 +7,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Forward all API calls to the Express backend on port 5000
-      '/auth': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      },
-      '/reputation': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      },
-      '/profile': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      },
-      '/badges': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      },
+      // Forward API calls to the Express backend on port 5000
+      // Use /api prefix to avoid clashing with frontend SPA routes
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
