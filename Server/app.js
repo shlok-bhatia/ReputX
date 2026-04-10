@@ -7,10 +7,13 @@ import "dotenv/config";
 import authRoutes from "./routes/auth.routes.js";
 import reputationRoutes from "./routes/reputation.routes.js";
 import profileRoutes from "./routes/profile.routes.js";
-import badgeRoutes from "./routes/badges.routes.js";
+import badgeRoutes from "./routes/badge.routes.js";
 import { publicScoreAPI } from "./controllers/reputationController.js";
 import { apiLimiter, publicApiLimiter } from "./middleware/rateLimiter.js";
 import errorHandler from "./middleware/errorHandler.js";
+
+// NOTE: Do NOT call connectDB() here — SocketServer.js handles the single
+// MongoDB connection via mongoose.connect() before starting the server.
 
 const app = express();
 
