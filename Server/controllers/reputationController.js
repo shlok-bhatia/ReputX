@@ -30,14 +30,14 @@ export async function getReputation(req, res, next) {
         cachedAt: new Date(),
         expiresAt: new Date(Date.now() + 6 * 60 * 60 * 1000),
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     // Update user tier and ENS
     await User.findOneAndUpdate(
       { address },
       { tier: result.tier, ensName: result.ensName, sybilRisk: result.sybilRisk },
-      { upsert: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     const badges = await Badge.find({ address }).lean();
@@ -79,12 +79,13 @@ export async function recalculateReputation(req, res, next) {
         cachedAt: new Date(),
         expiresAt: new Date(Date.now() + 6 * 60 * 60 * 1000),
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     await User.findOneAndUpdate(
       { address },
-      { tier: result.tier, ensName: result.ensName, sybilRisk: result.sybilRisk }
+      { tier: result.tier, ensName: result.ensName, sybilRisk: result.sybilRisk },
+      { returnDocument: 'after' }
     );
 
     // Emit real-time update via Socket.io
@@ -139,7 +140,7 @@ export async function publicScoreAPI(req, res, next) {
         cachedAt: new Date(),
         expiresAt: new Date(Date.now() + 6 * 60 * 60 * 1000),
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     return res.json({

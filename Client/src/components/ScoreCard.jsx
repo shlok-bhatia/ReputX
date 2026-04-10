@@ -42,7 +42,7 @@ export default function ScoreCard({ score = 0, size = 200, strokeWidth = 8 }) {
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          strokeDashoffset={animatedOffset}
+          strokeDashoffset={String(animatedOffset || 0)}
           style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)' }}
         />
         <defs>

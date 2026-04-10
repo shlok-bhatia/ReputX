@@ -34,7 +34,7 @@ export default function Profile() {
   // Real-time score updates via Socket.io
   useSocket(walletAddress, applyRealtimeUpdate);
 
-  const score  = data?.score || '-';
+  const score  = data?.score !== undefined ? data.score : '-';
   const tier   = data?.tier  || 'NA';
   const badges = data?.badges || [];
   const sybil  = data?.sybilRisk || 'NA';

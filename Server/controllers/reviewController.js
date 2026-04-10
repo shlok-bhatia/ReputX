@@ -152,7 +152,7 @@ export async function submitReview(req, res, next) {
         rating: Math.round(rating),
         comment: comment.trim(),
       },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
 
     return res.status(201).json({
@@ -254,7 +254,7 @@ export async function castVote(req, res, next) {
     await Vote.findOneAndUpdate(
       { voter: myAddress, target: targetAddress },
       { voter: myAddress, target: targetAddress, type },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     const summary = await getVoteCounts(targetAddress);

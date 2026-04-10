@@ -3,9 +3,9 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 const WalletContext = createContext(null);
 
 export function WalletProvider({ children }) {
-  const [isConnected, setIsConnected]     = useState(false);
-  const [walletAddress, setWalletAddress] = useState(null);
-  const [ensName, setEnsName]             = useState(null);
+  const [isConnected, setIsConnected]     = useState(() => !!localStorage.getItem('reputx_address'));
+  const [walletAddress, setWalletAddress] = useState(() => localStorage.getItem('reputx_address'));
+  const [ensName, setEnsName]             = useState(() => localStorage.getItem('reputx_ens') || null);
   const [isConnecting, setIsConnecting]   = useState(false);
 
   const connect = useCallback(async (address) => {
@@ -26,6 +26,8 @@ export function WalletProvider({ children }) {
           const provider = new ethers.BrowserProvider(window.ethereum);
           const name = await provider.lookupAddress(account);
           setEnsName(name);
+          if (name) localStorage.setItem('reputx_ens', name);
+          localStorage.setItem('reputx_address', account);
         } catch {
           setEnsName(null);
         }
@@ -36,6 +38,8 @@ export function WalletProvider({ children }) {
         setWalletAddress(mockAddress);
         setEnsName('guardian.eth');
         setIsConnected(true);
+        localStorage.setItem('reputx_address', mockAddress);
+        localStorage.setItem('reputx_ens', 'guardian.eth');
         return mockAddress;
       }
     } catch (err) {
@@ -49,6 +53,8 @@ export function WalletProvider({ children }) {
     setIsConnected(false);
     setWalletAddress(null);
     setEnsName(null);
+    localStorage.removeItem('reputx_address');
+    localStorage.removeItem('reputx_ens');
   }, []);
 
   return (

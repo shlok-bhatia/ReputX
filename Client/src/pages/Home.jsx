@@ -86,7 +86,7 @@ export default function Home({ onConnectClick }) {
                   strokeWidth="6"
                   strokeLinecap="round"
                   strokeDasharray={circumference}
-                  strokeDashoffset={scoreVisible ? circumference * (1 - fraction) : circumference}
+                  strokeDashoffset={String(scoreVisible ? circumference * (1 - fraction) : circumference)}
                 />
                 <defs>
                   <linearGradient id="homeScoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">

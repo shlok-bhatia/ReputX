@@ -40,7 +40,7 @@ export async function getProfile(req, res, next) {
         cachedAt: new Date(),
         expiresAt: new Date(Date.now() + 6 * 60 * 60 * 1000),
       },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     const badges = await Badge.find({ address });
@@ -82,7 +82,7 @@ export async function updateVisibility(req, res, next) {
     const user = await User.findOneAndUpdate(
       { address },
       { isPublic },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!user) {
@@ -132,7 +132,7 @@ export async function getLeaderboard(req, res, next) {
               cachedAt: new Date(),
               expiresAt: new Date(Date.now() + 6 * 60 * 60 * 1000),
             },
-            { upsert: true, new: true }
+            { upsert: true, returnDocument: 'after' }
           );
 
           return {

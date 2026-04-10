@@ -98,7 +98,7 @@ export async function evaluateAndAwardBadges(address, signalData) {
         await Badge.findOneAndUpdate(
           { address, type },
           { address, type, awardedAt: new Date() },
-          { upsert: true, new: true }
+          { upsert: true, returnDocument: 'after' }
         );
         awarded.push(type);
       }

@@ -24,5 +24,6 @@ export function getTierBarColor(score) {
  * Normalises score to 0-1 fraction
  */
 export function scoreToFraction(score, max = 1000) {
-  return Math.min(Math.max(score / max, 0), 1);
+  const numScore = Number(score) || 0;
+  return Math.min(Math.max(numScore / max, 0), 1);
 }

@@ -82,7 +82,7 @@ export async function verifySignature(req, res, next) {
     const user = await User.findOneAndUpdate(
       { address: normalizedAddress },
       { lastSeen: new Date() },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
     );
 
     // Issue JWT
