@@ -1,486 +1,314 @@
-import { useState, useEffect } from "react";
-
-const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  .rx-root {
-    min-height: 100vh;
-    background: #060a14;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Outfit', sans-serif;
-    position: relative;
-    overflow: hidden;
-    padding: 40px 20px;
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EtherealVault | Your Wallet is Your Reputation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "background": "#0e0e0f",
+          "surface": "#0e0e0f",
+          "surface-dim": "#0e0e0f",
+          "surface-container-lowest": "#000000",
+          "surface-container-low": "#131314",
+          "surface-container": "#19191b",
+          "surface-container-high": "#201f21",
+          "surface-container-highest": "#262627",
+          "surface-bright": "#2c2c2d",
+          "surface-variant": "#262627",
+          "primary": "#b6a0ff",
+          "primary-dim": "#7e51ff",
+          "primary-container": "#a98fff",
+          "primary-fixed": "#a98fff",
+          "secondary": "#00e3fd",
+          "secondary-dim": "#00d4ec",
+          "tertiary": "#ff6c95",
+          "on-surface": "#ffffff",
+          "on-surface-variant": "#adaaab",
+          "on-primary": "#340090",
+          "on-primary-fixed": "#000000",
+          "on-secondary": "#004d57",
+          "outline": "#767576",
+          "outline-variant": "#484849",
+          "inverse-primary": "#6834eb",
+        },
+        fontFamily: {
+          headline: ["Space Grotesk", "sans-serif"],
+          body: ["Manrope", "sans-serif"],
+          label: ["Manrope", "sans-serif"],
+        },
+        borderRadius: { xl: "0.75rem", full: "9999px" }
+      }
+    }
   }
-
-  .rx-grid {
-    position: absolute;
-    inset: 0;
+</script>
+<style>
+  * { box-sizing: border-box; }
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    display: inline-block; vertical-align: middle;
+  }
+  body {
+    background-color: #0e0e0f;
+    color: #ffffff;
+    font-family: 'Manrope', sans-serif;
+    overflow-x: hidden;
+  }
+  .glass-card {
+    background: rgba(38, 38, 39, 0.45);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+  .neon-glow-primary { box-shadow: 0 0 22px rgba(182,160,255,0.28); }
+  .neon-glow-cyan { box-shadow: 0 0 18px rgba(0,227,253,0.3); }
+  .mesh-bg {
     background-image:
-      linear-gradient(rgba(30,58,138,0.15) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(30,58,138,0.15) 1px, transparent 1px);
-    background-size: 40px 40px;
-    mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 40%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 40%, transparent 100%);
-    pointer-events: none;
+      radial-gradient(at 0% 0%, rgba(126,81,255,0.18) 0px, transparent 55%),
+      radial-gradient(at 100% 0%, rgba(0,227,253,0.12) 0px, transparent 55%),
+      radial-gradient(at 100% 100%, rgba(255,108,149,0.06) 0px, transparent 50%);
   }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  @keyframes pulse-ring { 0%{opacity:0.6} 50%{opacity:0.2} 100%{opacity:0.6} }
+  .float-anim { animation: float 6s ease-in-out infinite; }
+  .pulse-ring { animation: pulse-ring 3s ease-in-out infinite; }
+  .badge-item:hover { transform: scale(1.1); }
+  .badge-item { transition: transform 0.2s; }
+  .nav-link { transition: color 0.2s; }
+  .nav-link:hover { color: #b6a0ff; }
+  .btn-primary { transition: all 0.2s; }
+  .btn-primary:hover { opacity: 0.88; transform: scale(1.03); }
+  .btn-primary:active { transform: scale(0.97); }
+  .feature-card { transition: all 0.25s; }
+  .feature-card:hover { transform: translateY(-3px); }
+</style>
+</head>
+<body class="mesh-bg min-h-screen flex flex-col">
 
-  .rx-orb {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-    filter: blur(60px);
-  }
-  .rx-orb-1 {
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(37,99,235,0.22) 0%, transparent 70%);
-    top: -120px; left: -140px;
-  }
-  .rx-orb-2 {
-    width: 380px; height: 380px;
-    background: radial-gradient(circle, rgba(180,140,30,0.16) 0%, transparent 70%);
-    bottom: -80px; right: -80px;
-  }
-  .rx-orb-3 {
-    width: 260px; height: 260px;
-    background: radial-gradient(circle, rgba(37,99,235,0.1) 0%, transparent 70%);
-    bottom: 20%; left: 10%;
-  }
+<!-- TOP NAV -->
+<nav class="fixed top-0 w-full z-50 bg-[#0e0e0f]/72 backdrop-blur-3xl border-b border-white/[0.06]">
+  <div class="flex justify-between items-center h-[72px] px-8 max-w-[1400px] mx-auto">
+    <div class="text-2xl font-extrabold bg-gradient-to-br from-[#b6a0ff] to-[#7e51ff] bg-clip-text text-transparent font-['Space_Grotesk'] tracking-tight">
+      EtherealVault
+    </div>
+    <div class="hidden md:flex items-center gap-10 font-['Space_Grotesk'] font-semibold tracking-wide text-sm">
+      <a href="page_home.html" class="text-[#b6a0ff] border-b-2 border-[#b6a0ff] pb-0.5">Home</a>
+      <a href="page_leaderboard.html" class="text-[#adaaab] nav-link">Leaderboard</a>
+      <a href="page_profile.html" class="text-[#adaaab] nav-link">Profile</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="page_connect.html" class="btn-primary bg-gradient-to-br from-[#b6a0ff] to-[#7e51ff] text-black font-bold px-6 py-2.5 rounded-full text-sm neon-glow-primary">
+        Connect Wallet
+      </a>
+    </div>
+  </div>
+</nav>
 
-  /* Floating particles */
-  .rx-particle {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(96,165,250,0.35);
-    pointer-events: none;
-    animation: float-particle linear infinite;
-  }
+<!-- MAIN -->
+<main class="flex-grow pt-[72px] px-6 max-w-[1200px] mx-auto w-full">
 
-  @keyframes float-particle {
-    0%   { transform: translateY(0px) translateX(0px); opacity: 0; }
-    10%  { opacity: 1; }
-    90%  { opacity: 0.6; }
-    100% { transform: translateY(-120px) translateX(30px); opacity: 0; }
-  }
+  <!-- HERO -->
+  <section class="relative py-20 mb-20">
+    <div class="absolute -top-20 -left-20 w-[400px] h-[400px] bg-[#7e51ff]/20 rounded-full blur-[110px] pointer-events-none pulse-ring"></div>
 
-  .rx-card {
-    position: relative;
-    z-index: 2;
-    background: rgba(255,255,255,0.03);
-    border: 0.5px solid rgba(255,255,255,0.1);
-    border-radius: 24px;
-    padding: 52px 56px;
-    max-width: 460px;
-    width: 100%;
-    text-align: center;
-    overflow: hidden;
-    transition: border-color 0.3s ease;
-  }
-  .rx-card:hover {
-    border-color: rgba(96,165,250,0.2);
-  }
-
-  .rx-card-glow {
-    position: absolute;
-    top: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 220px; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(96,165,250,0.7), transparent);
-    pointer-events: none;
-  }
-
-  .rx-card-shine {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(37,99,235,0.06) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  /* Badge */
-  .rx-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: rgba(37,99,235,0.1);
-    border: 0.5px solid rgba(37,99,235,0.4);
-    border-radius: 100px;
-    padding: 5px 14px;
-    margin-bottom: 32px;
-    animation: fadeUp 0.5s 0.1s ease both;
-    opacity: 0;
-  }
-  .rx-badge-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: #3b82f6;
-    box-shadow: 0 0 8px rgba(59,130,246,0.8);
-    animation: pulse-dot 2s ease-in-out infinite;
-  }
-  .rx-badge-label {
-    font-size: 10.5px;
-    font-weight: 500;
-    color: #60a5fa;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  /* Logo */
-  .rx-logo-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 13px;
-    margin-bottom: 10px;
-    animation: fadeUp 0.5s 0.18s ease both;
-    opacity: 0;
-  }
-  .rx-logo-icon {
-    width: 44px; height: 44px;
-    background: linear-gradient(145deg, #1e3a8a 0%, #1d4ed8 100%);
-    border-radius: 11px;
-    border: 0.5px solid rgba(96,165,250,0.35);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    box-shadow: 0 4px 20px rgba(37,99,235,0.25);
-  }
-  .rx-logo-wordmark {
-    font-family: 'Cinzel', serif;
-    font-size: 33px;
-    font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 0.05em;
-    line-height: 1;
-  }
-  .rx-logo-wordmark .gold { color: #d4a843; }
-
-  .rx-tagline {
-    font-size: 11px;
-    color: rgba(255,255,255,0.3);
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    margin-bottom: 36px;
-    animation: fadeUp 0.5s 0.26s ease both;
-    opacity: 0;
-  }
-
-  .rx-headline {
-    font-size: 22px;
-    font-weight: 600;
-    color: #f1f5f9;
-    margin-bottom: 10px;
-    line-height: 1.35;
-    animation: fadeUp 0.5s 0.34s ease both;
-    opacity: 0;
-  }
-  .rx-sub {
-    font-size: 14px;
-    color: rgba(255,255,255,0.42);
-    margin-bottom: 38px;
-    line-height: 1.7;
-    animation: fadeUp 0.5s 0.42s ease both;
-    opacity: 0;
-  }
-
-  /* Connect Button */
-  .rx-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 11px;
-    background: linear-gradient(135deg, #1e40af 0%, #2563eb 60%, #3b82f6 100%);
-    border: 0.5px solid rgba(96,165,250,0.4);
-    border-radius: 13px;
-    padding: 17px 28px;
-    color: #ffffff;
-    font-family: 'Outfit', sans-serif;
-    font-size: 15.5px;
-    font-weight: 600;
-    cursor: pointer;
-    letter-spacing: 0.02em;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    margin-bottom: 30px;
-    animation: fadeUp 0.5s 0.5s ease both;
-    opacity: 0;
-    box-shadow: 0 4px 24px rgba(37,99,235,0.3);
-  }
-  .rx-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 55%);
-    pointer-events: none;
-  }
-  .rx-btn::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  }
-  .rx-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(37,99,235,0.45);
-    border-color: rgba(96,165,250,0.65);
-  }
-  .rx-btn:active {
-    transform: translateY(0px) scale(0.99);
-    box-shadow: 0 2px 12px rgba(37,99,235,0.3);
-  }
-  .rx-btn-spinner {
-    width: 18px; height: 18px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: #ffffff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-
-  /* Divider */
-  .rx-divider {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 24px;
-    animation: fadeUp 0.5s 0.58s ease both;
-    opacity: 0;
-  }
-  .rx-divider-line {
-    flex: 1;
-    height: 0.5px;
-    background: rgba(255,255,255,0.07);
-  }
-  .rx-divider-text {
-    font-size: 10.5px;
-    color: rgba(255,255,255,0.22);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  /* Trust row */
-  .rx-trust {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 22px;
-    flex-wrap: wrap;
-    animation: fadeUp 0.5s 0.64s ease both;
-    opacity: 0;
-  }
-  .rx-trust-item {
-    display: flex; align-items: center; gap: 5px;
-  }
-  .rx-trust-label {
-    font-size: 11px;
-    color: rgba(255,255,255,0.28);
-    letter-spacing: 0.04em;
-  }
-
-  /* Footer */
-  .rx-footer {
-    position: relative;
-    z-index: 2;
-    margin-top: 32px;
-    font-size: 11px;
-    color: rgba(255,255,255,0.18);
-    letter-spacing: 0.07em;
-    animation: fadeUp 0.5s 0.72s ease both;
-    opacity: 0;
-  }
-
-  /* Keyframes */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes pulse-dot {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50%       { transform: scale(0.65); opacity: 0.5; }
-  }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  @media (max-width: 520px) {
-    .rx-card { padding: 40px 28px; }
-    .rx-logo-wordmark { font-size: 27px; }
-    .rx-trust { gap: 14px; }
-  }
-`;
-
-const ShieldIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2L4 6V12C4 16.4 7.4 20.5 12 22C16.6 20.5 20 16.4 20 12V6L12 2Z"
-      fill="rgba(255,255,255,0.12)" stroke="#93c5fd" strokeWidth="1.2" strokeLinejoin="round" />
-    <path d="M9 12L11 14L15 10" stroke="#bfdbfe" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const WalletIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="2" y="6" width="20" height="14" rx="3" stroke="white" strokeWidth="1.5" />
-    <path d="M16 13C16 13.5523 15.5523 14 15 14C14.4477 14 14 13.5523 14 13C14 12.4477 14.4477 12 15 12C15.5523 12 16 12.4477 16 13Z" fill="white" />
-    <path d="M2 10H22" stroke="white" strokeWidth="1.5" />
-  </svg>
-);
-
-const TrustIcon = ({ type }) => {
-  if (type === "shield")
-    return (
-      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-        <path d="M8 1L2 4V8C2 11.3 4.7 14.3 8 15C11.3 14.3 14 11.3 14 8V4L8 1Z"
-          stroke="#d4a843" strokeWidth="1" strokeLinejoin="round" fill="rgba(212,168,67,0.1)" />
-        <path d="M5.5 8L7 9.5L10.5 6" stroke="#d4a843" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  if (type === "zero")
-    return (
-      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="8" r="6" stroke="#d4a843" strokeWidth="1" fill="rgba(212,168,67,0.1)" />
-        <path d="M5.5 8H10.5M8 5.5V10.5" stroke="#d4a843" strokeWidth="1" strokeLinecap="round" />
-      </svg>
-    );
-  return (
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-      <rect x="3" y="5" width="10" height="8" rx="2" stroke="#d4a843" strokeWidth="1" fill="rgba(212,168,67,0.1)" />
-      <path d="M6 5V4C6 2.9 6.9 2 8 2C9.1 2 10 2.9 10 4V5" stroke="#d4a843" strokeWidth="1" strokeLinecap="round" />
-      <circle cx="8" cy="9" r="1" fill="#d4a843" />
-    </svg>
-  );
-};
-
-const PARTICLES = Array.from({ length: 12 }, (_, i) => ({
-  id: i,
-  size: Math.random() * 3 + 2,
-  left: `${Math.random() * 100}%`,
-  bottom: `${Math.random() * 30}%`,
-  duration: `${Math.random() * 6 + 5}s`,
-  delay: `${Math.random() * 6}s`,
-}));
-
-export default function ReputXSignIn() {
-  const [loading, setLoading] = useState(false);
-  const [connected, setConnected] = useState(false);
-
-  const handleConnect = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setConnected(true);
-    }, 2000);
-  };
-
-  useEffect(() => {
-    const style = document.createElement("style");
-    style.textContent = styles;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
-  }, []);
-
-  return (
-    <div className="rx-root">
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap');
-      `}</style>
-
-      {/* Background layers */}
-      <div className="rx-grid" />
-      <div className="rx-orb rx-orb-1" />
-      <div className="rx-orb rx-orb-2" />
-      <div className="rx-orb rx-orb-3" />
-
-      {/* Floating particles */}
-      {PARTICLES.map((p) => (
-        <div
-          key={p.id}
-          className="rx-particle"
-          style={{
-            width: p.size, height: p.size,
-            left: p.left, bottom: p.bottom,
-            animationDuration: p.duration,
-            animationDelay: p.delay,
-          }}
-        />
-      ))}
-
-      {/* Main card */}
-      <div className="rx-card">
-        <div className="rx-card-glow" />
-        <div className="rx-card-shine" />
-
-        {/* Live badge */}
-        <div className="rx-badge">
-          <div className="rx-badge-dot" />
-          <span className="rx-badge-label">Web3 Reputation Layer</span>
-        </div>
-
-        {/* Logo */}
-        <div className="rx-logo-row">
-          <div className="rx-logo-icon">
-            <ShieldIcon />
-          </div>
-          <div className="rx-logo-wordmark">
-            Reput<span className="gold">X</span>
-          </div>
-        </div>
-
-        <p className="rx-tagline">On-Chain Trust Protocol</p>
-
-        <h1 className="rx-headline">Verify your on-chain identity</h1>
-        <p className="rx-sub">
-          Connect your wallet to access your reputation score,
-          credentials, and trust network.
-        </p>
-
-        {/* CTA */}
-        <button className="rx-btn" onClick={handleConnect} disabled={loading || connected}>
-          {loading ? (
-            <div className="rx-btn-spinner" />
-          ) : connected ? (
-            <>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="1.5" fill="rgba(255,255,255,0.1)" />
-                <path d="M8 12L10.5 14.5L16 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Wallet Connected
-            </>
-          ) : (
-            <>
-              <WalletIcon />
-              Connect Wallet
-            </>
-          )}
-        </button>
-
-        {/* Trust divider */}
-        <div className="rx-divider">
-          <div className="rx-divider-line" />
-          <span className="rx-divider-text">Secured by</span>
-          <div className="rx-divider-line" />
-        </div>
-
-        {/* Trust indicators */}
-        <div className="rx-trust">
-          {[
-            { type: "shield", label: "Non-custodial" },
-            { type: "zero",   label: "Zero-knowledge" },
-            { type: "lock",   label: "End-to-end encrypted" },
-          ].map(({ type, label }) => (
-            <div className="rx-trust-item" key={type}>
-              <TrustIcon type={type} />
-              <span className="rx-trust-label">{label}</span>
-            </div>
-          ))}
-        </div>
+    <div class="max-w-[680px]">
+      <div class="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-[#00e3fd]/10 border border-[#00e3fd]/25">
+        <span class="material-symbols-outlined text-[#00e3fd] text-sm" style="font-variation-settings:'FILL' 1">verified</span>
+        <span class="text-[#00e3fd] text-xs font-bold uppercase tracking-[0.18em] font-['Manrope']">Decentralized Trust Layer</span>
       </div>
 
-      <p className="rx-footer">© 2026 ReputX Protocol · All rights reserved</p>
+      <h1 class="font-headline text-[clamp(48px,7vw,82px)] font-extrabold leading-[1.06] tracking-[-2px] text-white mb-6">
+        Your Wallet is Your
+        <span class="block bg-gradient-to-r from-[#b6a0ff] via-[#00e3fd] to-[#7e51ff] bg-clip-text text-transparent">Reputation</span>
+      </h1>
+
+      <p class="font-body text-lg md:text-xl text-[#adaaab] max-w-[560px] mb-10 leading-relaxed">
+        Analyze on-chain activity. Build trust. Unlock Web3 with a decentralized identity score that reflects your true contribution to the ecosystem.
+      </p>
+
+      <div class="flex flex-wrap gap-4">
+        <a href="page_connect.html" class="btn-primary inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-br from-[#b6a0ff] to-[#7e51ff] rounded-full text-black font-bold text-base neon-glow-primary">
+          Connect Wallet
+          <span class="material-symbols-outlined text-lg">arrow_forward</span>
+        </a>
+        <a href="page_profile.html" class="btn-primary inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-base border border-white/10 bg-white/[0.04]">
+          View Demo
+        </a>
+      </div>
     </div>
-  );
-}
+
+    <!-- Floating Score Orb -->
+    <div class="absolute right-0 top-8 hidden lg:flex items-center justify-center float-anim" style="width:300px;height:300px;">
+      <div class="relative w-full h-full flex items-center justify-center">
+        <div class="absolute inset-0 rounded-full border border-[#b6a0ff]/15 pulse-ring"></div>
+        <div class="absolute inset-6 rounded-full bg-[#7e51ff]/08"></div>
+        <svg width="220" height="220" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="#262627" stroke-width="9"/>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="#00e3fd" stroke-width="9"
+            stroke-dasharray="326.7" stroke-dashoffset="57.8"
+            stroke-linecap="round" transform="rotate(-90 60 60)"
+            style="filter:drop-shadow(0 0 8px rgba(0,227,253,0.75))"/>
+          <text x="60" y="56" text-anchor="middle" fill="white" font-size="21" font-weight="800" font-family="Space Grotesk">842</text>
+          <text x="60" y="69" text-anchor="middle" fill="#adaaab" font-size="7" font-family="Manrope">PLATINUM</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENTO GRID -->
+  <section class="grid grid-cols-1 md:grid-cols-12 gap-5 mb-28">
+
+    <!-- Reputation Score (7 cols) -->
+    <div class="md:col-span-7 glass-card rounded-[2rem] p-9 border border-white/[0.07] overflow-hidden relative feature-card group">
+      <div class="absolute bottom-[-10%] right-[-8%] w-56 h-56 bg-[#00e3fd]/10 rounded-full blur-[70px] transition-all group-hover:bg-[#00e3fd]/20"></div>
+      <div class="relative z-10">
+        <span class="text-[#00e3fd] font-label text-[11px] uppercase tracking-[0.2em] mb-4 block font-bold">Identity Core</span>
+        <h3 class="font-headline text-[28px] font-bold mb-4">Reputation Score</h3>
+        <p class="text-[#adaaab] text-[15px] max-w-md mb-8 leading-relaxed">
+          A dynamic 0–1000 scale calculating your reliability based on wallet age, transaction volume, and cross-chain interactions.
+        </p>
+        <div class="flex items-end gap-8">
+          <svg width="148" height="148" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#262627" stroke-width="9"/>
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#00e3fd" stroke-width="9"
+              stroke-dasharray="326.7" stroke-dashoffset="57.8"
+              stroke-linecap="round" transform="rotate(-90 60 60)"
+              style="filter:drop-shadow(0 0 7px rgba(0,227,253,0.8))"/>
+            <text x="60" y="57" text-anchor="middle" fill="white" font-size="22" font-weight="800" font-family="Space Grotesk">842</text>
+            <text x="60" y="70" text-anchor="middle" fill="#adaaab" font-size="7" font-family="Manrope">PLATINUM</text>
+          </svg>
+          <div class="flex flex-col gap-3 pb-2">
+            <div class="flex items-center gap-2.5">
+              <div class="w-2 h-2 rounded-full bg-[#00e3fd]" style="box-shadow:0 0 6px #00e3fd"></div>
+              <span class="text-[13px] text-[#adaaab]">Top 0.5% of Ecosystem</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-2 h-2 rounded-full bg-[#b6a0ff]" style="box-shadow:0 0 6px #b6a0ff"></div>
+              <span class="text-[13px] text-[#adaaab]">+12 pts last 30 days</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <div class="w-2 h-2 rounded-full bg-[#ff6c95]"></div>
+              <span class="text-[13px] text-[#adaaab]">Sybil risk: LOW</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sybil Detection (5 cols) -->
+    <div class="md:col-span-5 glass-card rounded-[2rem] p-9 border border-white/[0.07] feature-card group">
+      <div class="w-14 h-14 bg-[#262627] rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110">
+        <span class="material-symbols-outlined text-[#00e3fd] text-3xl" style="font-variation-settings:'FILL' 1">verified_user</span>
+      </div>
+      <h3 class="font-headline text-[22px] font-bold mb-3">Sybil Detection</h3>
+      <p class="text-[#adaaab] mb-7 text-[14px] leading-relaxed">
+        AI-driven patterns identifying organic human behavior vs. automated bot farming scripts.
+      </p>
+      <div class="bg-black rounded-xl p-4 border border-white/[0.05]">
+        <div class="flex justify-between items-center mb-2.5">
+          <span class="text-xs text-[#adaaab]">Human Probability</span>
+          <span class="text-xs text-[#00e3fd] font-bold">99.2%</span>
+        </div>
+        <div class="w-full bg-[#262627] h-1.5 rounded-full">
+          <div class="bg-[#00e3fd] h-full rounded-full" style="width:99.2%;box-shadow:0 0 10px rgba(0,227,253,0.6)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Governance (5 cols) -->
+    <div class="md:col-span-5 glass-card rounded-[2rem] p-9 border border-white/[0.07] flex flex-col justify-between feature-card">
+      <div>
+        <div class="w-14 h-14 bg-[#262627] rounded-2xl flex items-center justify-center mb-6">
+          <span class="material-symbols-outlined text-[#ff6c95] text-3xl" style="font-variation-settings:'FILL' 1">account_balance</span>
+        </div>
+        <h3 class="font-headline text-[22px] font-bold mb-3">Governance Alpha</h3>
+        <p class="text-[#adaaab] text-[14px] leading-relaxed">
+          Track participation in Tally, Snapshot, and on-chain voting to prove governance commitment.
+        </p>
+      </div>
+      <div class="flex -space-x-3 mt-7">
+        <div class="w-10 h-10 rounded-full border-2 border-[#0e0e0f] bg-[#3b82f6] flex items-center justify-center overflow-hidden text-xs font-bold">E</div>
+        <div class="w-10 h-10 rounded-full border-2 border-[#0e0e0f] bg-[#8b5cf6] flex items-center justify-center overflow-hidden text-xs font-bold">U</div>
+        <div class="w-10 h-10 rounded-full border-2 border-[#0e0e0f] bg-[#f59e0b] flex items-center justify-center overflow-hidden text-xs font-bold">A</div>
+        <div class="w-10 h-10 rounded-full border-2 border-[#0e0e0f] bg-[#262627] flex items-center justify-center text-[10px] font-bold">+12</div>
+      </div>
+    </div>
+
+    <!-- Badges (7 cols) -->
+    <div class="md:col-span-7 glass-card rounded-[2rem] p-9 border border-white/[0.07] relative overflow-hidden feature-card">
+      <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-[#b6a0ff]/06 rounded-full blur-[50px]"></div>
+      <div class="flex justify-between items-start mb-8">
+        <div>
+          <h3 class="font-headline text-[22px] font-bold mb-1.5">On-chain Badges</h3>
+          <p class="text-[#adaaab] text-[13px] max-w-xs">Non-transferable proof of skills and achievements earned on-chain.</p>
+        </div>
+        <a href="page_profile.html" class="text-[#b6a0ff] font-bold hover:underline flex items-center gap-1 text-sm">
+          View All <span class="material-symbols-outlined text-sm">open_in_new</span>
+        </a>
+      </div>
+      <div class="grid grid-cols-4 gap-4">
+        <div class="badge-item aspect-square bg-[#b6a0ff]/12 rounded-2xl flex flex-col items-center justify-center gap-2 border border-[#b6a0ff]/20 cursor-pointer" style="box-shadow:0 0 12px rgba(182,160,255,0.15)">
+          <span class="material-symbols-outlined text-[#b6a0ff] text-3xl" style="font-variation-settings:'FILL' 1">shield</span>
+          <span class="text-[9px] text-[#adaaab] uppercase tracking-wider">Clean Record</span>
+        </div>
+        <div class="badge-item aspect-square bg-[#00e3fd]/10 rounded-2xl flex flex-col items-center justify-center gap-2 border border-[#00e3fd]/20 cursor-pointer" style="box-shadow:0 0 12px rgba(0,227,253,0.12)">
+          <span class="material-symbols-outlined text-[#00e3fd] text-3xl" style="font-variation-settings:'FILL' 1">bolt</span>
+          <span class="text-[9px] text-[#adaaab] uppercase tracking-wider">Power User</span>
+        </div>
+        <div class="badge-item aspect-square bg-[#ff6c95]/10 rounded-2xl flex flex-col items-center justify-center gap-2 border border-[#ff6c95]/20 cursor-pointer">
+          <span class="material-symbols-outlined text-[#ff6c95] text-3xl" style="font-variation-settings:'FILL' 1">workspace_premium</span>
+          <span class="text-[9px] text-[#adaaab] uppercase tracking-wider">OG Wallet</span>
+        </div>
+        <div class="badge-item aspect-square bg-[#a98fff]/10 rounded-2xl flex flex-col items-center justify-center gap-2 border border-[#a98fff]/20 cursor-pointer">
+          <span class="material-symbols-outlined text-[#a98fff] text-3xl" style="font-variation-settings:'FILL' 1">military_tech</span>
+          <span class="text-[9px] text-[#adaaab] uppercase tracking-wider">DAO Founder</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA SECTION -->
+  <section class="mb-28 text-center py-20 relative rounded-[3rem] overflow-hidden border border-[#b6a0ff]/12">
+    <div class="absolute inset-0 bg-gradient-to-br from-[#7e51ff]/12 via-black to-[#00e3fd]/10"></div>
+    <div class="relative z-10 px-6">
+      <h2 class="font-headline text-[clamp(30px,5vw,50px)] font-extrabold mb-5">Ready to claim your Vault?</h2>
+      <p class="text-[#adaaab] text-lg max-w-xl mx-auto mb-10 leading-relaxed">
+        Join 500,000+ users building trust in the next generation of the internet.
+      </p>
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <a href="page_connect.html" class="btn-primary inline-flex items-center justify-center gap-2 px-10 py-4 rounded-full text-base font-bold bg-[#b6a0ff] text-black" style="box-shadow:0 0 30px rgba(182,160,255,0.35)">
+          Mint Your ID
+        </a>
+        <button class="btn-primary px-10 py-4 rounded-full text-base font-bold bg-white/05 backdrop-blur-md border border-white/10">
+          Learn More
+        </button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="w-full py-10 px-8 bg-black border-t border-white/[0.05]">
+  <div class="flex flex-col md:flex-row justify-between items-center gap-6 max-w-[1200px] mx-auto">
+    <div>
+      <div class="text-lg font-extrabold text-[#b6a0ff] font-['Space_Grotesk']">Ethereal Vault</div>
+      <p class="text-xs text-[#adaaab] mt-1">© 2026 Ethereal Vault. Secured by Decentralized Consensus.</p>
+    </div>
+    <div class="flex flex-wrap justify-center gap-7 text-xs text-[#adaaab]">
+      <a href="#" class="hover:text-white transition-colors">Privacy Protocol</a>
+      <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+      <a href="#" class="hover:text-white transition-colors">Github</a>
+      <a href="#" class="hover:text-white transition-colors">Discord</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
