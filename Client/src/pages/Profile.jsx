@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
 import ScoreCard from '../components/ScoreCard';
 import BadgeShelf from '../components/BadgeShelf';
 import ProfileToggle from '../components/ProfileToggle';
@@ -11,18 +11,17 @@ import { useSocket } from '../hooks/useSocket';
 import { formatAddress } from '../config/formatAddress';
 import api from '../config/axios';
 import './Profile.css';
+import './Home.css';
 
 const STATS_TEMPLATE = [
-  { icon: '🔄', label: 'Transactions', key: 'transactionCount', fallback: '1,240', colorClass: 'stat-card__icon--tx' },
-  { icon: '🖼️', label: 'NFTs Held',     key: 'nftHoldings',      fallback: '42',    colorClass: 'stat-card__icon--nft' },
-  { icon: '🗳️', label: 'DAO Votes',     key: 'daoVotes',         fallback: '15',    colorClass: 'stat-card__icon--dao' },
-  { icon: '📜', label: 'Contracts',     key: 'uniqueContracts',  fallback: '88',    colorClass: 'stat-card__icon--con' },
+  { icon: '🔄', label: 'Transactions', key: 'transactionCount', fallback: '0', colorClass: 'stat-card__icon--tx' },
+  { icon: '🖼️', label: 'NFTs Held',     key: 'nftHoldings',      fallback: '0',    colorClass: 'stat-card__icon--nft' },
+  { icon: '🗳️', label: 'DAO Votes',     key: 'daoVotes',         fallback: '0',    colorClass: 'stat-card__icon--dao' },
+  { icon: '📜', label: 'Contracts',     key: 'uniqueContracts',  fallback: '0',    colorClass: 'stat-card__icon--con' },
 ];
 
 const TIMELINE = [
-  { date: 'March 2024', title: 'Tier "Trusted" Achieved',        desc: 'Crossed 700 Reputation threshold.', dot: 'cyan' },
-  { date: 'January 2024', title: '1,000 Transactions Milestone', desc: 'Processed on Ethereum Mainnet.',    dot: 'purple' },
-  { date: 'Late 2023', title: 'Genesis Contribution',            desc: 'First DAO governance participation.', dot: 'gray' },
+ 
 ];
 
 export default function Profile() {
@@ -31,16 +30,23 @@ export default function Profile() {
   const { data, loading, applyRealtimeUpdate } = useReputation(walletAddress);
   const [isPublic, setIsPublic] = useState(false);
   const [privacyUpdating, setPrivacyUpdating] = useState(false);
-
+  const [showModal, setShowModal] = useState(false);
   // Real-time score updates via Socket.io
   useSocket(walletAddress, applyRealtimeUpdate);
 
-  const score  = data?.score || 742;
-  const tier   = data?.tier  || 'Trusted';
-  const badges = data?.badges || ['DAO Voter', 'ENS Holder', 'OG Wallet'];
-  const sybil  = data?.sybilRisk || 'LOW';
+  const score  = data?.score || '-';
+  const tier   = data?.tier  || 'NA';
+  const badges = data?.badges || [];
+  const sybil  = data?.sybilRisk || 'NA';
   const breakdown = data?.breakdown || {};
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowModal(true);
+    }, 800);
+  
+    return () => clearTimeout(timer);
+  }, []);
   // Build stats from breakdown data
   const stats = STATS_TEMPLATE.map(s => ({
     ...s,
@@ -67,9 +73,36 @@ export default function Profile() {
 
   return (
     <>
+<<<<<<< HEAD
       {!isAuthenticated && <WalletConnect hideClose={true} onClose={() => {}} />}
       <div className="profile-page" id="profile-page" style={!isAuthenticated ? { filter: 'blur(8px)', maxHeight: '100vh', overflow: 'hidden' } : {}}>
         <div className="profile-content" style={!isAuthenticated ? { pointerEvents: 'none' } : {}}>
+=======
+    {showModal && (
+  <div className="modal-overlay">
+    <div className="modal">
+      <h2>Connect Your Wallet</h2>
+      <p>To view your on-chain reputation score</p>
+
+      <button
+        className="btn-primary"
+        onClick={() => {
+          setShowModal(false);
+          onConnectClick();
+        }}
+      >
+        Connect Wallet
+      </button>
+
+      <button className="modal-close" onClick={() => setShowModal(false)}>
+        Skip
+      </button>
+    </div>
+  </div>
+)}
+    <div className="profile-page" id="profile-page">
+      <div className="profile-content">
+>>>>>>> 4fa9228efd6e269f6ebc1b9aac3dc435c3db491c
         {/* ── Trust Velocity (Score Ring) ── */}
         <div className="trust-velocity-card">
           <span className="trust-velocity-card__label">Reputation Score</span>
@@ -117,7 +150,7 @@ export default function Profile() {
           <div className="identity-card__stats">
             <div>
               <div className="identity-stat__label">Wallet Age</div>
-              <div className="identity-stat__value">3.2 Years</div>
+              <div className="identity-stat__value">NA</div>
             </div>
             <div>
               <div className="identity-stat__label">Sybil Risk</div>

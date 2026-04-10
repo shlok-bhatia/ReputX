@@ -4,11 +4,14 @@ import './Home.css';
 
 export default function Home({ onConnectClick }) {
   const [scoreVisible, setScoreVisible] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setScoreVisible(true), 300);
     return () => clearTimeout(t);
   }, []);
+
+
 
   const demoScore = 842;
   const fraction = scoreToFraction(demoScore);
@@ -16,7 +19,10 @@ export default function Home({ onConnectClick }) {
   const circumference = 2 * Math.PI * radius;
 
   return (
+    <>
+     
     <div className="home" id="home-page">
+     
       {/* ── Hero ── */}
       <section className="hero">
         <div className="hero__bg" />
@@ -30,7 +36,7 @@ export default function Home({ onConnectClick }) {
             score that reflects your true contribution to the ecosystem.
           </p> */}
           <div className="hero__actions">
-            <button className="btn-primary" id="hero-connect-btn" onClick={onConnectClick}>
+            <button className="btn-primary" id="hero-connect-btn"  onClick={onConnectClick}>
               Connect Wallet →
             </button>
           </div>
@@ -172,5 +178,6 @@ export default function Home({ onConnectClick }) {
         </div>
       </section>
     </div>
+    </>
   );
 }

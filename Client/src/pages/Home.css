@@ -484,3 +484,31 @@
   justify-content: center;
   gap: 14px;
 }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal {
+  background: rgba(255,255,255,0.05);
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.modal-close {
+  margin-top: 10px;
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+}
