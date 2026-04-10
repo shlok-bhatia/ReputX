@@ -4,7 +4,7 @@ import api from '../config/axios';
 /**
  * Hook for Sign-In With Ethereum (SIWE) flow.
  * 1. GET /auth/nonce?address=...
- * 2. User signs the nonce (mock — MetaMask in production)
+ * 2. User signs the nonce (via MetaMask, or mock if MetaMask unavailable)
  * 3. POST /auth/verify { address, signature }
  * 4. Returns JWT on success
  */
@@ -17,14 +17,31 @@ export function useSIWE() {
     setError(null);
 
     try {
-      // Step 1 — fetch nonce
+      // Step 1 — fetch nonce and message from backend
       const { data: nonceData } = await api.get(`/auth/nonce?address=${address}`);
       const nonce = nonceData.nonce;
+      const message = nonceData.message;
 
-      // Step 2 — sign nonce (mock for now; real: signMessage via wagmi)
-      const signature = `mock-sig-${nonce}`;
+      let signature;
 
-      // Step 3 — verify
+      // Step 2 — sign message with MetaMask or fall back to mock
+      if (window.ethereum) {
+        try {
+          signature = await window.ethereum.request({
+            method: 'personal_sign',
+            params: [message, address],
+          });
+        } catch (signErr) {
+          setError('User rejected the signature request');
+          setLoading(false);
+          return null;
+        }
+      } else {
+        // Mock signature when MetaMask is not available
+        signature = `mock-sig-${nonce}`;
+      }
+
+      // Step 3 — verify signature with backend
       const { data: verifyData } = await api.post('/auth/verify', {
         address,
         signature,
@@ -33,7 +50,8 @@ export function useSIWE() {
       setLoading(false);
       return verifyData; // { token, address }
     } catch (e) {
-      setError(e?.response?.data?.message || e.message || 'SIWE failed');
+      const msg = e?.response?.data?.error || e?.response?.data?.message || e.message || 'SIWE failed';
+      setError(msg);
       setLoading(false);
       return null;
     }

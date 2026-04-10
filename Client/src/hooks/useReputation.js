@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import api from '../config/axios';
 
 const MOCK_SCORE = {
   score: 742,
@@ -20,31 +21,45 @@ const MOCK_SCORE = {
 };
 
 /**
- * Fetches (or mocks) the reputation score for a given address.
+ * Fetches the reputation score for a given address from the backend.
+ * Falls back to mock data if the API is unavailable.
  */
 export function useReputation(address) {
   const [data,    setData]    = useState(null);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState(null);
 
-  const fetch = useCallback(async () => {
+  const fetchReputation = useCallback(async () => {
     if (!address) return;
     setLoading(true);
     setError(null);
     try {
-      // In production: const res = await axios.get(`/reputation/${address}`);
-      await new Promise((r) => setTimeout(r, 900));
-      setData(MOCK_SCORE);
+      const res = await api.get(`/reputation/${address}`);
+      const apiData = res.data;
+
+      // Normalise API response to match component expectations
+      setData({
+        score: apiData.score,
+        tier: apiData.tier,
+        breakdown: apiData.breakdown || {},
+        sybilRisk: apiData.sybilRisk || 'NONE',
+        badges: apiData.badges || [],
+        fromCache: apiData.fromCache,
+        cachedAt: apiData.cachedAt,
+      });
     } catch (e) {
-      setError(e.message || 'Failed to load reputation');
+      console.warn('[useReputation] API failed, using mock data:', e.message);
+      // Fall back to mock data so the UI still works without a running backend
+      setData(MOCK_SCORE);
+      setError(null); // Clear error since we have fallback data
     } finally {
       setLoading(false);
     }
   }, [address]);
 
   useEffect(() => {
-    fetch();
-  }, [fetch]);
+    fetchReputation();
+  }, [fetchReputation]);
 
-  return { data, loading, error, refetch: fetch };
+  return { data, loading, error, refetch: fetchReputation };
 }

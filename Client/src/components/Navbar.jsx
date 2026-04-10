@@ -1,18 +1,25 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useWalletContext } from '../context/WalletContext';
+import { useAuth } from '../context/AuthContext';
 import { formatAddress } from '../config/formatAddress';
 import './Navbar.css';
 
 export default function Navbar({ onConnectClick }) {
   const location = useLocation();
-  const { isConnected, walletAddress } = useWalletContext();
+  const { isConnected, walletAddress, disconnect } = useWalletContext();
+  const { logout, isAuthenticated } = useAuth();
 
   const navLinks = [
     { path: '/', label: 'Home' },
     // { path: '/leaderboard', label: 'Leaderboard' },
     { path: '/profile', label: 'Profile' },
   ];
+
+  const handleDisconnect = () => {
+    disconnect();
+    logout();
+  };
 
   return (
     <nav className="navbar" id="main-navbar">
@@ -41,7 +48,12 @@ export default function Navbar({ onConnectClick }) {
         )}
 
         {isConnected ? (
-          <button className="btn-connect btn-connect--connected" id="wallet-connected-btn">
+          <button
+            className="btn-connect btn-connect--connected"
+            id="wallet-connected-btn"
+            onClick={handleDisconnect}
+            title="Click to disconnect"
+          >
             {formatAddress(walletAddress)}
           </button>
         ) : (

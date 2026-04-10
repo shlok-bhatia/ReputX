@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useWalletContext } from '../context/WalletContext';
+import { useReputation } from '../hooks/useReputation';
 import './BankLoans.css';
 
 const BANKS = [
@@ -65,28 +67,31 @@ const BANKS = [
 ];
 
 export default function BankLoans() {
-  // Simulating user score. In a real app, this would come from context/global state.
-  const [userScore, setUserScore] = useState(0);
+  const { walletAddress } = useWalletContext();
+  const { data: repData, loading } = useReputation(walletAddress);
+
+  // Animated score display
+  const [displayScore, setDisplayScore] = useState(0);
+  const actualScore = repData?.score || 785; // fallback score when not connected
 
   useEffect(() => {
-    // Animate score count up
     let start = 0;
-    const target = 785; // Simulated target score
+    const target = actualScore;
     const duration = 1500;
     const increment = target / (duration / 16);
 
     const timer = setInterval(() => {
       start += increment;
       if (start >= target) {
-        setUserScore(target);
+        setDisplayScore(target);
         clearInterval(timer);
       } else {
-        setUserScore(Math.floor(start));
+        setDisplayScore(Math.floor(start));
       }
     }, 16);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [actualScore]);
 
   return (
     <div className="loans-container">
@@ -97,12 +102,13 @@ export default function BankLoans() {
 
       <div className="user-score-section">
         <span className="score-label">Your Current ReputX Score:</span>
-        <span className="score-value">{userScore}</span>
+        <span className="score-value">{displayScore}</span>
+        {loading && <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginLeft: 8 }}>Fetching...</span>}
       </div>
 
       <div className="loans-grid">
         {BANKS.map(bank => {
-          const isEligible = userScore >= bank.minScore;
+          const isEligible = actualScore >= bank.minScore;
           
           return (
             <div key={bank.id} className={`bank-card ${isEligible ? 'eligible' : 'ineligible'}`}>

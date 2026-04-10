@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import mongoose from "mongoose";
-import connectDB from "./config/db.js";
 import "dotenv/config";
 
 import authRoutes from "./routes/auth.routes.js";
@@ -13,7 +12,9 @@ import { publicScoreAPI } from "./controllers/reputationController.js";
 import { apiLimiter, publicApiLimiter } from "./middleware/rateLimiter.js";
 import errorHandler from "./middleware/errorHandler.js";
 
-connectDB();
+// NOTE: Do NOT call connectDB() here — SocketServer.js handles the single
+// MongoDB connection via mongoose.connect() before starting the server.
+
 const app = express();
 
 // Security headers

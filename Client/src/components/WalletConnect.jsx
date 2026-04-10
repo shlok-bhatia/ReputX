@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useWalletContext } from '../context/WalletContext';
+import { useAuth } from '../context/AuthContext';
+import { useSIWE } from '../hooks/useSIWE';
 import { formatAddress } from '../config/formatAddress';
 import './WalletConnect.css';
 
@@ -12,20 +14,49 @@ const WALLETS = [
 
 export default function WalletConnect({ onClose }) {
   const { connect, isConnected, walletAddress } = useWalletContext();
+  const { login } = useAuth();
+  const { signIn, loading: siweLoading, error: siweError } = useSIWE();
   const [connecting, setConnecting] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const [toastExiting, setToastExiting] = useState(false);
+  const [authError, setAuthError] = useState(null);
 
   const handleSelect = async (walletId) => {
     setConnecting(walletId);
-    await connect();
-    setConnecting(null);
-    onClose();
-    setShowToast(true);
-    setTimeout(() => {
-      setToastExiting(true);
-      setTimeout(() => { setShowToast(false); setToastExiting(false); }, 300);
-    }, 3500);
+    setAuthError(null);
+
+    try {
+      // Step 1 — connect wallet
+      await connect();
+
+      // Get the connected address
+      let address = walletAddress;
+      if (!address && window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        address = accounts[0];
+      }
+      if (!address) {
+        address = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F'; // mock fallback
+      }
+
+      // Step 2 — SIWE authentication
+      const result = await signIn(address);
+      if (result?.token) {
+        login(result.token, result.address);
+      }
+      // Even if SIWE fails, wallet is still connected — user can browse with mock data
+    } catch (err) {
+      console.error('[WalletConnect] Error:', err);
+      setAuthError(err.message || 'Connection failed');
+    } finally {
+      setConnecting(null);
+      onClose();
+      setShowToast(true);
+      setTimeout(() => {
+        setToastExiting(true);
+        setTimeout(() => { setShowToast(false); setToastExiting(false); }, 300);
+      }, 3500);
+    }
   };
 
   const closeToast = () => {
@@ -43,6 +74,12 @@ export default function WalletConnect({ onClose }) {
           <h2 className="wallet-modal__title">Connect Your Wallet</h2>
           <p className="wallet-modal__sub">Select your preferred entry point to the Vault.</p>
 
+          {(siweError || authError) && (
+            <p style={{ color: '#ff4d6a', fontSize: '0.85rem', margin: '0 0 12px' }}>
+              {siweError || authError}
+            </p>
+          )}
+
           <div className="wallet-options">
             {WALLETS.map((w) => (
               <button
@@ -50,7 +87,7 @@ export default function WalletConnect({ onClose }) {
                 className="wallet-option"
                 id={`wallet-option-${w.id}`}
                 onClick={() => handleSelect(w.id)}
-                disabled={connecting !== null}
+                disabled={connecting !== null || siweLoading}
               >
                 <div className={`wallet-option__icon ${w.iconClass}`}>{w.emoji}</div>
                 <span className="wallet-option__name">{w.name}</span>
