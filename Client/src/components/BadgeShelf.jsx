@@ -1,12 +1,12 @@
 import React from 'react';
 
 const ALL_BADGES = [
-  { key: 'dao_voter',     icon: '🏛️', name: 'DAO Voter' },
-  { key: 'og_wallet',     icon: '💎', name: 'OG Wallet' },
-  { key: 'ens_holder',    icon: '🌐', name: 'ENS Holder' },
-  { key: 'diamond_hands', icon: '💠', name: 'Diamond Hands' },
-  { key: 'power_user',    icon: '⚡', name: 'Power User' },
-  { key: 'clean_record',  icon: '✅', name: 'Clean Record' },
+  { key: 'DAO_VOTER',     icon: '🏛️', name: 'DAO Voter' },
+  { key: 'OG_WALLET',     icon: '💎', name: 'OG Wallet' },
+  { key: 'ENS_HOLDER',    icon: '🌐', name: 'ENS Holder' },
+  { key: 'DIAMOND_HANDS', icon: '💠', name: 'Diamond Hands' },
+  { key: 'POWER_USER',    icon: '⚡', name: 'Power User' },
+  { key: 'CLEAN_RECORD',  icon: '✅', name: 'Clean Record' },
 ];
 
 /**
@@ -14,7 +14,7 @@ const ALL_BADGES = [
  * Props: earnedBadges (string[]), e.g. ['DAO Voter', 'ENS Holder', 'OG Wallet']
  */
 export default function BadgeShelf({ earnedBadges = [] }) {
-  const earnedCount = ALL_BADGES.filter(b => earnedBadges.includes(b.name)).length;
+  const earnedCount = ALL_BADGES.filter(b => earnedBadges.includes(b.key) || earnedBadges.includes(b.name)).length;
 
   return (
     <div className="badges-section" id="badge-shelf">
@@ -27,7 +27,7 @@ export default function BadgeShelf({ earnedBadges = [] }) {
 
       <div className="profile-badges-grid">
         {ALL_BADGES.map((badge) => {
-          const earned = earnedBadges.includes(badge.name);
+          const earned = earnedBadges.includes(badge.key) || earnedBadges.includes(badge.name);
           return (
             <div
               key={badge.key}

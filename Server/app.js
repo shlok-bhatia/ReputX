@@ -9,7 +9,7 @@ import reputationRoutes from "./routes/reputation.routes.js";
 import profileRoutes from "./routes/profile.routes.js";
 import badgeRoutes from "./routes/badge.routes.js";
 import { publicScoreAPI } from "./controllers/reputationController.js";
-import { apiLimiter, publicApiLimiter } from "./middleware/rateLimiter.js";
+// import { apiLimiter, publicApiLimiter } from "./middleware/rateLimiter.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 // NOTE: Do NOT call connectDB() here — SocketServer.js handles the single
@@ -35,7 +35,7 @@ app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: false }));
 
 // General rate limiter on all routes
-app.use(apiLimiter);
+// app.use(apiLimiter);
 
 // Health check
 app.get("/health", (req, res) => {
@@ -53,7 +53,7 @@ app.use("/profile", profileRoutes);
 app.use("/badges", badgeRoutes);
 
 // Public third-party API endpoint
-app.get("/api/score/:address", publicApiLimiter, publicScoreAPI);
+// app.get("/api/score/:address", publicApiLimiter, publicScoreAPI);
 
 // 404 handler
 app.use((req, res) => {

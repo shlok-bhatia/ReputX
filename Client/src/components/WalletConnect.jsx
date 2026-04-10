@@ -27,10 +27,10 @@ export default function WalletConnect({ onClose }) {
 
     try {
       // Step 1 — connect wallet
-      await connect();
+      const returnedAddress = await connect();
 
       // Get the connected address
-      let address = walletAddress;
+      let address = returnedAddress || walletAddress;
       if (!address && window.ethereum) {
         const accounts = await window.ethereum.request({ method: 'eth_accounts' });
         address = accounts[0];

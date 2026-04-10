@@ -6,6 +6,7 @@ import { calculateScore } from "../services/scoreEngine.js";
 import { detectSybil } from "../services/sybilDetector.js";
 import ReputationScore from "../models/ReputationScore.model.js";
 import User from "../models/User.model.js";
+import Badge from "../models/Badge.model.js";
 
 /**
  * Fetch all on-chain data and compute score for a given address
@@ -73,12 +74,14 @@ export async function getReputation(req, res, next) {
     // Check cache
     const cached = await ReputationScore.findOne({ address });
     if (cached) {
+      const badges = await Badge.find({ address }).lean();
       return res.json({
         address,
         score: cached.score,
         tier: cached.tier,
         breakdown: cached.breakdown,
         sybilRisk: cached.sybilRisk,
+        badges: badges.map(b => b.type),
         cachedAt: cached.cachedAt,
         fromCache: true,
       });
@@ -107,12 +110,15 @@ export async function getReputation(req, res, next) {
       { upsert: true }
     );
 
+    const badges = await Badge.find({ address }).lean();
+
     return res.json({
       address,
       score: result.score,
       tier: result.tier,
       breakdown: result.breakdown,
       sybilRisk: result.sybilRisk,
+      badges: badges.map(b => b.type),
       cachedAt: new Date(),
       fromCache: false,
     });
@@ -162,12 +168,15 @@ export async function recalculateReputation(req, res, next) {
       });
     }
 
+    const badges = await Badge.find({ address }).lean();
+
     return res.json({
       address,
       score: result.score,
       tier: result.tier,
       breakdown: result.breakdown,
       sybilRisk: result.sybilRisk,
+      badges: badges.map(b => b.type),
       recalculatedAt: new Date(),
     });
   } catch (err) {

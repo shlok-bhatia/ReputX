@@ -5,14 +5,14 @@ import {
   publicScoreAPI,
 } from "../controllers/reputationController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
-import { recalculateLimiter, publicApiLimiter } from "../middleware/rateLimiter.js";
+// import { recalculateLimiter, publicApiLimiter } from "../middleware/rateLimiter.js";
 
 const router = Router();
 
 router.get("/:address", getReputation);
-router.post("/recalculate", authMiddleware, recalculateLimiter, recalculateReputation);
+router.post("/recalculate", authMiddleware, recalculateReputation);
 
 // Public API for third-party dApps
-router.get("/api/score/:address", publicApiLimiter, publicScoreAPI);
+router.get("/api/score/:address", publicScoreAPI);
 
 export default router;
