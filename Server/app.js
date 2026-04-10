@@ -2,16 +2,18 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import mongoose from "mongoose";
+import connectDB from "./config/db.js";
 import "dotenv/config";
 
 import authRoutes from "./routes/auth.routes.js";
 import reputationRoutes from "./routes/reputation.routes.js";
 import profileRoutes from "./routes/profile.routes.js";
-import badgeRoutes from "./routes/badges.routes.js";
+import badgeRoutes from "./routes/badge.routes.js";
 import { publicScoreAPI } from "./controllers/reputationController.js";
 import { apiLimiter, publicApiLimiter } from "./middleware/rateLimiter.js";
 import errorHandler from "./middleware/errorHandler.js";
 
+connectDB();
 const app = express();
 
 // Security headers

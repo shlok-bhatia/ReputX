@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,11 +11,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "alchemy-sdk": "^3.6.5",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "cron": "^4.4.0",
     "dotenv": "^17.4.1",
+    "ethers": "^6.16.0",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.3.2",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.4.1",
     "node-cron": "^4.2.1",

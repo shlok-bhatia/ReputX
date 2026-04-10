@@ -1,10 +1,10 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 // Strict limiter for recalculate endpoint
 export const recalculateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
-  keyGenerator: (req) => req.user?.address || req.ip,
+  keyGenerator: (req) => req.user?.address || ipKeyGenerator(req),
   message: { error: "Too many recalculation requests. Limit is 5 per hour." },
   standardHeaders: true,
   legacyHeaders: false,
