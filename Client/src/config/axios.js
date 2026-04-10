@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// In development, Vite proxy forwards /auth, /reputation, etc. to localhost:5000
-// so we can use relative paths. In production, set VITE_API_URL to the backend URL.
+// In development, Vite proxy forwards /api/* to localhost:5000
+// In production, set VITE_API_URL to the backend URL.
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 const api = axios.create({

@@ -17,7 +17,7 @@ export function useENS(address) {
 
     (async () => {
       try {
-        const res = await api.get(`/profile/${address}`);
+        const res = await api.get(`/api/profile/${address}`);
         if (!cancelled) {
           setEnsName(res.data.ensName || null);
         }

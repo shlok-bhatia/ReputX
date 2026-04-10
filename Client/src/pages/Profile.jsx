@@ -5,6 +5,7 @@ import ProfileToggle from '../components/ProfileToggle';
 import { useWalletContext } from '../context/WalletContext';
 import { useAuth } from '../context/AuthContext';
 import { useReputation } from '../hooks/useReputation';
+import { useSocket } from '../hooks/useSocket';
 import { formatAddress } from '../config/formatAddress';
 import api from '../config/axios';
 import './Profile.css';
@@ -25,9 +26,12 @@ const TIMELINE = [
 export default function Profile() {
   const { walletAddress, ensName } = useWalletContext();
   const { isAuthenticated } = useAuth();
-  const { data, loading } = useReputation(walletAddress);
+  const { data, loading, applyRealtimeUpdate } = useReputation(walletAddress);
   const [isPublic, setIsPublic] = useState(false);
   const [privacyUpdating, setPrivacyUpdating] = useState(false);
+
+  // Real-time score updates via Socket.io
+  useSocket(walletAddress, applyRealtimeUpdate);
 
   const score  = data?.score || 742;
   const tier   = data?.tier  || 'Trusted';
@@ -49,7 +53,7 @@ export default function Profile() {
 
     setPrivacyUpdating(true);
     try {
-      await api.put('/profile/visibility', { isPublic: newValue });
+      await api.put('/api/profile/visibility', { isPublic: newValue });
     } catch (err) {
       console.warn('[Profile] Failed to update visibility:', err.message);
       // Revert on failure
