@@ -102,6 +102,12 @@ export async function getLeaderboard(req, res, next) {
       .limit(limit)
       .lean();
 
+    const aggResult = await ReputationScore.aggregate([
+      { $match: { address: { $in: publicUsers }, sybilRisk: { $ne: "HIGH" } } },
+      { $group: { _id: null, avgScore: { $avg: "$score" } } }
+    ]);
+    const avgScore = aggResult.length > 0 ? Math.round(aggResult[0].avgScore) : 0;
+
     // Enrich with ENS names from User model
     const userMap = await User.find({
       address: { $in: scores.map((s) => s.address) },
@@ -119,7 +125,7 @@ export async function getLeaderboard(req, res, next) {
       tier: s.tier,
     }));
 
-    return res.json({ leaderboard, page, limit });
+    return res.json({ leaderboard, page, limit, total: publicUsers.length, avgScore });
   } catch (err) {
     next(err);
   }

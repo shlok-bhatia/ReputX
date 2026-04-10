@@ -38,6 +38,7 @@ export default function LeaderBoard() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [avgScore, setAvgScore] = useState(847);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState('');
   const { walletAddress } = useWalletContext();
@@ -50,7 +51,7 @@ export default function LeaderBoard() {
       try {
         const limit = activeFilter === 'Top 10' ? 10 : activeFilter === 'Top 50' ? 50 : 100;
         const res = await api.get(`/api/profile/leaderboard?limit=${limit}&page=${currentPage}`);
-        const { leaderboard } = res.data;
+        const { leaderboard, total, avgScore: fetchedAvgScore } = res.data;
 
         if (!cancelled && leaderboard?.length > 0) {
           const mapped = leaderboard.map((entry, idx) => ({
@@ -63,7 +64,8 @@ export default function LeaderBoard() {
             gradient: GRADIENTS[idx % GRADIENTS.length],
           }));
           setEntries(mapped);
-          setTotalCount(res.data.total || mapped.length);
+          setTotalCount(total || mapped.length);
+          if (fetchedAvgScore) setAvgScore(fetchedAvgScore);
         }
       } catch {
         // Backend unavailable — use mock data
@@ -160,7 +162,7 @@ export default function LeaderBoard() {
               <span className="leaderboard-stat-chip__label">Active Vaults</span>
             </div>
             <div className="leaderboard-stat-chip">
-              <span className="leaderboard-stat-chip__value">847</span>
+              <span className="leaderboard-stat-chip__value">{avgScore}</span>
               <span className="leaderboard-stat-chip__label">Avg Score</span>
             </div>
             <div className="leaderboard-stat-chip">

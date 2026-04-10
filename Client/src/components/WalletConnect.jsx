@@ -12,7 +12,7 @@ const WALLETS = [
   { id: 'wc',        name: 'WalletConnect',    iconClass: 'wallet-option__icon--wc',       emoji: '🔗', popular: false },
 ];
 
-export default function WalletConnect({ onClose }) {
+export default function WalletConnect({ onClose, hideClose = false }) {
   const { connect, isConnected, walletAddress } = useWalletContext();
   const { login } = useAuth();
   const { signIn, loading: siweLoading, error: siweError } = useSIWE();
@@ -70,9 +70,11 @@ export default function WalletConnect({ onClose }) {
   return (
     <>
       {/* Modal overlay */}
-      <div className="modal-overlay" id="wallet-modal-overlay" onClick={onClose}>
+      <div className="modal-overlay" id="wallet-modal-overlay" onClick={hideClose ? undefined : onClose}>
         <div className="wallet-modal" onClick={(e) => e.stopPropagation()}>
-          <button className="wallet-modal__close" onClick={onClose} aria-label="Close">✕</button>
+          {!hideClose && (
+            <button className="wallet-modal__close" onClick={onClose} aria-label="Close">✕</button>
+          )}
 
           <h2 className="wallet-modal__title">Connect Your Wallet</h2>
           <p className="wallet-modal__sub">Select your preferred entry point to the Vault.</p>

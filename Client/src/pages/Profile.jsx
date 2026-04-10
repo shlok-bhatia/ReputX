@@ -3,6 +3,7 @@ import ScoreCard from '../components/ScoreCard';
 import BadgeShelf from '../components/BadgeShelf';
 import ProfileToggle from '../components/ProfileToggle';
 import ReviewSection from '../components/ReviewSection';
+import WalletConnect from '../components/WalletConnect';
 import { useWalletContext } from '../context/WalletContext';
 import { useAuth } from '../context/AuthContext';
 import { useReputation } from '../hooks/useReputation';
@@ -65,8 +66,10 @@ export default function Profile() {
   }, [isAuthenticated]);
 
   return (
-    <div className="profile-page" id="profile-page">
-      <div className="profile-content">
+    <>
+      {!isAuthenticated && <WalletConnect hideClose={true} onClose={() => {}} />}
+      <div className="profile-page" id="profile-page" style={!isAuthenticated ? { filter: 'blur(8px)', maxHeight: '100vh', overflow: 'hidden' } : {}}>
+        <div className="profile-content" style={!isAuthenticated ? { pointerEvents: 'none' } : {}}>
         {/* ── Trust Velocity (Score Ring) ── */}
         <div className="trust-velocity-card">
           <span className="trust-velocity-card__label">Reputation Score</span>
@@ -160,5 +163,6 @@ export default function Profile() {
         </div>
       </div>
     </div>
+    </>
   );
 }
