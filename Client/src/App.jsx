@@ -9,9 +9,10 @@ import Home from './pages/Home';
 import LeaderBoard from './pages/LeaderBoard';
 import Profile from './pages/Profile';
 import BankLoans from './pages/BankLoans';
+import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 
-const SIDEBAR_PAGES = ['/leaderboard', '/profile', '/loans'];
+const SIDEBAR_PAGES = ['/leaderboard', '/profile', '/loans', '/settings'];
 
 function App() {
   const [walletModalOpen, setWalletModalOpen] = useState(false);
@@ -30,6 +31,7 @@ function App() {
               <Route path="/leaderboard" element={<LeaderBoard />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/loans" element={<BankLoans />} />
+              <Route path="/settings" element={<Settings />} />
             </Routes>
           </main>
         </div>

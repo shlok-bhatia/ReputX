@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import ScoreCard from '../components/ScoreCard';
 import BadgeShelf from '../components/BadgeShelf';
 import ProfileToggle from '../components/ProfileToggle';
+import ReviewSection from '../components/ReviewSection';
 import { useWalletContext } from '../context/WalletContext';
 import { useAuth } from '../context/AuthContext';
 import { useReputation } from '../hooks/useReputation';
@@ -142,6 +143,9 @@ export default function Profile() {
             ))}
           </div>
         </div>
+
+        {/* ── Peer Reviews & Votes ── */}
+        <ReviewSection profileAddress={walletAddress} />
 
         {/* ── Upgrade CTA ── */}
         <div className="upgrade-cta">

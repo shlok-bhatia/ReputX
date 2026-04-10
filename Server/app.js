@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes.js";
 import reputationRoutes from "./routes/reputation.routes.js";
 import profileRoutes from "./routes/profile.routes.js";
 import badgeRoutes from "./routes/badge.routes.js";
+import reviewRoutes from "./routes/review.routes.js";
 import { publicScoreAPI } from "./controllers/reputationController.js";
 // import { apiLimiter, publicApiLimiter } from "./middleware/rateLimiter.js";
 import errorHandler from "./middleware/errorHandler.js";
@@ -51,6 +52,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/reputation", reputationRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/badges", badgeRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 // Public third-party API endpoint
 // app.get("/api/score/:address", publicApiLimiter, publicScoreAPI);

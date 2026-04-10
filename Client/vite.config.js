@@ -10,15 +10,15 @@ export default defineConfig({
       // Forward API calls to the Express backend on port 5000
       // Use /api prefix to avoid clashing with frontend SPA routes
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://127.0.0.1:5000',
         changeOrigin: true,
       },
       '/health': {
-        target: 'http://localhost:5000',
+        target: 'http://127.0.0.1:5000',
         changeOrigin: true,
       },
       '/socket.io': {
-        target: 'http://localhost:5000',
+        target: 'http://127.0.0.1:5000',
         changeOrigin: true,
         ws: true,
       },

@@ -26,15 +26,6 @@ export default function WalletConnect({ onClose }) {
     setAuthError(null);
 
     try {
-<<<<<<< HEAD
-      // Step 1 — connect wallet
-      const returnedAddress = await connect();
-
-      // Get the connected address
-      let address = returnedAddress || walletAddress;
-      if (!address && window.ethereum) {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-=======
       // Step 1 — connect wallet and get the address directly
       // connect() returns the address, avoiding the stale state race condition
       let address;
@@ -43,7 +34,6 @@ export default function WalletConnect({ onClose }) {
         const accounts = await window.ethereum.request({
           method: 'eth_requestAccounts',
         });
->>>>>>> 5c193f287d1478db754be93b97da2e4114a5ffa2
         address = accounts[0];
       } else {
         address = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F'; // mock fallback

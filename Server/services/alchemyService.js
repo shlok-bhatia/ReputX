@@ -124,10 +124,61 @@ export async function getUniqueContracts(address) {
   }
 }
 
+/**
+ * Check if two addresses have ever transacted with each other on Ethereum.
+ * Checks A -> B and B -> A.
+ */
+export async function checkMutualTransfers(addressA, addressB) {
+  try {
+    const [aToB, bToA] = await Promise.all([
+      alchemy.core.getAssetTransfers({
+        fromAddress: addressA,
+        toAddress: addressB,
+        category: ["external", "erc20", "erc721", "erc1155"],
+        withMetadata: true,
+        maxCount: 1,
+      }),
+      alchemy.core.getAssetTransfers({
+        fromAddress: addressB,
+        toAddress: addressA,
+        category: ["external", "erc20", "erc721", "erc1155"],
+        withMetadata: true,
+        maxCount: 1,
+      }),
+    ]);
+
+    if (aToB.transfers?.length > 0) {
+      return {
+        txHash: aToB.transfers[0].hash,
+        timestamp: aToB.transfers[0].metadata.blockTimestamp,
+        asset: aToB.transfers[0].asset,
+        value: aToB.transfers[0].value,
+        direction: "A_TO_B"
+      };
+    }
+
+    if (bToA.transfers?.length > 0) {
+      return {
+        txHash: bToA.transfers[0].hash,
+        timestamp: bToA.transfers[0].metadata.blockTimestamp,
+        asset: bToA.transfers[0].asset,
+        value: bToA.transfers[0].value,
+        direction: "B_TO_A"
+      };
+    }
+
+    return null;
+  } catch (err) {
+    console.error("[AlchemyService] checkMutualTransfers error:", err.message);
+    return null;
+  }
+}
+
 export default {
   getTransactions,
   getNFTs,
   getTokenBalances,
   getWalletAge,
   getUniqueContracts,
+  checkMutualTransfers,
 };

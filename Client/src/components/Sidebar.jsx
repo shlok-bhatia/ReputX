@@ -5,7 +5,7 @@ import './Slidebar.css';
 const NAV_ITEMS = [
   { icon: '⚙️', label: 'Identity',      path: '/profile' },
   { icon: '🏦', label: 'Loans',         path: '/loans' },
-  { icon: '⚙️', label: 'Settings',      path: '#' },
+  { icon: '⚙️', label: 'Settings',      path: '/settings' },
 ];
 
 export default function Sidebar() {
