@@ -25,6 +25,10 @@ const reputationScoreSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
+    stats: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
     sybilRisk: {
       type: String,
       enum: ["LOW", "MEDIUM", "HIGH", "NONE"],

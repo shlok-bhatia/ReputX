@@ -18,6 +18,12 @@ const MOCK_SCORE = {
   humanProbability: 99.2,
   topPercent: '0.5',
   pointsLast30: 12,
+  stats: {
+    transactionCount: 300,
+    uniqueContracts: 45,
+    nftHoldings: 12,
+    daoVotes: 50,
+  },
 };
 
 /**
@@ -56,6 +62,7 @@ export function useReputation(address) {
         score: apiData.score,
         tier: apiData.tier,
         breakdown: apiData.breakdown || {},
+        stats: apiData.stats || {},
         sybilRisk: apiData.sybilRisk || 'NONE',
         badges: badgeLabels,
         fromCache: apiData.fromCache,

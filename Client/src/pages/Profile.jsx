@@ -20,9 +20,7 @@ const STATS_TEMPLATE = [
   { icon: '📜', label: 'Contracts',     key: 'uniqueContracts',  fallback: '0',    colorClass: 'stat-card__icon--con' },
 ];
 
-const TIMELINE = [
- 
-];
+// Timeline fetched from backend
 
 export default function Profile() {
   const { address: paramAddress } = useParams();
@@ -38,6 +36,7 @@ export default function Profile() {
   const [privacyUpdating, setPrivacyUpdating] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [profileData, setProfileData] = useState(null);
+  const [timeline, setTimeline] = useState([]);
 
   // Fetch profile data (including display name, bio, etc.)
   useEffect(() => {
@@ -52,14 +51,24 @@ export default function Profile() {
         console.warn('Failed to fetch profile data:', err);
       }
     };
-    
+    const fetchMilestones = async () => {
+      try {
+        const res = await api.get(`/api/milestones/${profileAddress}`);
+        setTimeline(res.data);
+      } catch (err) {
+        console.warn('Failed to fetch milestones:', err);
+      }
+    };
+
     fetchProfile();
+    fetchMilestones();
   }, [profileAddress]);
 
   const score  = data?.score !== undefined ? data.score : '-';
   const tier   = data?.tier  || 'NA';
   const badges = data?.badges || [];
   const sybil  = data?.sybilRisk || 'NA';
+  const statsData = data?.stats || {};
   const breakdown = data?.breakdown || {};
 
   const formatWalletAge = (dateString) => {
@@ -78,10 +87,10 @@ export default function Profile() {
   
     return () => clearTimeout(timer);
   }, []);
-  // Build stats from breakdown data
+  // Build stats from statsData data (fallback to breakdown points if stats is missing, though we updated backend to send stats)
   const stats = STATS_TEMPLATE.map(s => ({
     ...s,
-    value: breakdown[s.key] != null ? String(breakdown[s.key]) : s.fallback,
+    value: statsData[s.key] != null ? String(statsData[s.key]) : (breakdown[s.key] != null ? String(breakdown[s.key]) : s.fallback),
   }));
 
   // Toggle profile visibility via API
@@ -173,16 +182,20 @@ export default function Profile() {
         <div className="timeline-section">
           <h3 className="timeline-section__title">History</h3>
           <div className="timeline">
-            {TIMELINE.map(({ date, title, desc, dot }, i) => (
-              <div className="timeline-item" key={i}>
-                <div className={`timeline-dot timeline-dot--${dot}`} />
-                <div className="timeline-body">
-                  <span className="timeline-body__date" style={dot === 'purple' ? { color: 'var(--accent-purple)' } : {}}>{date}</span>
-                  <p className="timeline-body__title">{title}</p>
-                  <p className="timeline-body__desc">{desc}</p>
+            {timeline.length > 0 ? (
+              timeline.map(({ date, title, desc, dot }, i) => (
+                <div className="timeline-item" key={i}>
+                  <div className={`timeline-dot timeline-dot--${dot}`} />
+                  <div className="timeline-body">
+                    <span className="timeline-body__date" style={dot === 'purple' ? { color: 'var(--accent-purple)' } : {}}>{date}</span>
+                    <p className="timeline-body__title">{title}</p>
+                    <p className="timeline-body__desc">{desc}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontStyle: 'italic' }}>No history to display yet.</div>
+            )}
           </div>
         </div>
 
