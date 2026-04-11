@@ -118,7 +118,7 @@ export default function Home({ onConnectClick }) {
           <div className="feature-card__icon">🛡️</div>
           <h2 className="feature-card__title">Sybil Detection</h2>
           <p className="feature-card__desc">
-            AI-driven patterns identifying organic human behavior vs. automated bot farming scripts.
+           Reputation Engine patterns identifying organic human behavior vs. automated bot farming scripts.
           </p>
           <div className="sybil-bar">
             <div className="sybil-bar__header">
@@ -174,7 +174,7 @@ export default function Home({ onConnectClick }) {
         </p>
         <div className="cta-section__actions">
           <button className="btn-primary" onClick={onConnectClick}>Mint Your ID</button>
-          <button className="btn-secondary">Learn More</button>
+          {/* <button className="btn-secondary">Learn More</button> */}
         </div>
       </section>
     </div>
