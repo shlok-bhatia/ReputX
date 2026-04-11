@@ -3,67 +3,67 @@ import { useWalletContext } from '../context/WalletContext';
 import { useReputation } from '../hooks/useReputation';
 import './BankLoans.css';
 
-const BANKS = [
+const LENDERS = [
   {
     id: 1,
-    name: 'StellarBank',
-    icon: '🏦',
-    description: 'A global leader in decentralized finance offering flexible terms.',
+    name: 'Nexo',
+    icon: '🔵',
+    description: 'Instant crypto credit lines with flexible repayment options.',
     minScore: 400,
-    maxLoan: '5,000 USDC',
-    interest: '8.5%',
-    term: '12 Months'
+    // maxLoan: '5,000 USDC',
+    // interest: '7.9%',
+    term: 'Flexible'
   },
   {
     id: 2,
-    name: 'Nexus Trust',
-    icon: '🏛️',
-    description: 'Premium lending for established reputation profiles.',
-    minScore: 600,
-    maxLoan: '25,000 USDC',
-    interest: '5.2%',
-    term: '24 Months'
+    name: 'Crypto.com',
+    icon: '🦁',
+    description: 'Monetize your crypto assets without selling them.',
+    minScore: 550,
+    // maxLoan: '25,000 USDC',
+    // interest: '5.5%',
+    term: '12 Months'
   },
   {
     id: 3,
-    name: 'Quantum Finance',
-    icon: '💳',
-    description: 'Algorithmically optimized loans for high-trust users.',
-    minScore: 750,
-    maxLoan: '100,000 USDC',
-    interest: '3.8%',
-    term: '36 Months'
+    name: 'Unchained Capital',
+    icon: '⛓️',
+    description: 'Collaborative custody bitcoin loans for individuals and businesses.',
+    minScore: 700,
+    // maxLoan: '100,000 USDC',
+    // interest: '4.2%',
+    term: '24 Months'
   },
   {
     id: 4,
-    name: 'Aegis Vault',
-    icon: '🛡️',
-    description: 'Exclusive, institutional-grade capital access.',
-    minScore: 900,
-    maxLoan: '500,000 USDC',
-    interest: '2.1%',
-    term: '60 Months'
+    name: 'Aave',
+    icon: '👻',
+    description: 'Decentralized non-custodial liquidity market protocol.',
+    minScore: 800,
+    // maxLoan: '500,000 USDC',
+    // interest: 'Variable',
+    term: 'No Fixed Term'
   },
-  {
-    id: 5,
-    name: 'Nova Credit',
-    icon: '🚀',
-    description: 'Fast-track short-term loans with competitive rates.',
-    minScore: 500,
-    maxLoan: '15,000 USDC',
-    interest: '6.5%',
-    term: '6 Months'
-  },
-  {
-    id: 6,
-    name: 'Vertex Capital',
-    icon: '⛰️',
-    description: 'Scaling your financial power with apex reputation rewards.',
-    minScore: 820,
-    maxLoan: '250,000 USDC',
-    interest: '2.9%',
-    term: '48 Months'
-  }
+  // {
+  //   id: 5,
+  //   name: 'MakerDAO',
+  //   icon: '🏺',
+  //   description: 'Borrow DAI against your crypto collateral globally.',
+  //   minScore: 650,
+  //   // maxLoan: '50,000 DAI',
+  //   // interest: '3.0%',
+  //   term: 'Flexible'
+  // },
+  // {
+  //   id: 6,
+  //   name: 'Compound',
+  //   icon: '☄️',
+  //   description: 'Algorithmic, autonomous interest rate protocol built for developers.',
+  //   minScore: 750,
+  //   // maxLoan: '250,000 USDC',
+  //   // interest: '2.5%',
+  //   term: 'Flexible'
+  // }
 ];
 
 export default function BankLoans() {
@@ -107,36 +107,36 @@ export default function BankLoans() {
       </div>
 
       <div className="loans-grid">
-        {BANKS.map(bank => {
-          const isEligible = actualScore >= bank.minScore;
+        {LENDERS.map(lender => {
+          const isEligible = actualScore >= lender.minScore;
           
           return (
-            <div key={bank.id} className={`bank-card ${isEligible ? 'eligible' : 'ineligible'}`}>
+            <div key={lender.id} className={`bank-card ${isEligible ? 'eligible' : 'ineligible'}`}>
               {!isEligible && (
                 <div className="locked-overlay">
                   <div className="locked-icon">🔒</div>
                   <div className="locked-text">
-                    Requires ReputX Score of {bank.minScore}+
+                    Requires ReputX Score of {lender.minScore}+
                   </div>
                 </div>
               )}
               
-              <div className="bank-icon">{bank.icon}</div>
-              <h2 className="bank-name">{bank.name}</h2>
-              <p className="bank-description">{bank.description}</p>
+              <div className="bank-icon">{lender.icon}</div>
+              <h2 className="bank-name">{lender.name}</h2>
+              <p className="bank-description">{lender.description}</p>
               
               <div className="loan-details">
                 <div className="detail-row">
                   <span className="detail-label">Max Loan</span>
-                  <span className="detail-value highlight">{bank.maxLoan}</span>
+                  <span className="detail-value highlight">{lender.maxLoan}</span>
                 </div>
                 <div className="detail-row">
                   <span className="detail-label">Interest Rate</span>
-                  <span className="detail-value">{bank.interest}</span>
+                  <span className="detail-value">{lender.interest}</span>
                 </div>
                 <div className="detail-row">
                   <span className="detail-label">Max Term</span>
-                  <span className="detail-value">{bank.term}</span>
+                  <span className="detail-value">{lender.term}</span>
                 </div>
               </div>
 

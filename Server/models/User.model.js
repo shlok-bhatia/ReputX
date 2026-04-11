@@ -13,6 +13,23 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    displayName: {
+      type: String,
+      default: null,
+    },
+    bio: {
+      type: String,
+      default: null,
+      maxLength: 160,
+    },
+    email: {
+      type: String,
+      default: null,
+    },
+    twitter: {
+      type: String,
+      default: null,
+    },
     tier: {
       type: String,
       enum: ["Anon", "New Wallet", "Established", "Trusted", "OG"],

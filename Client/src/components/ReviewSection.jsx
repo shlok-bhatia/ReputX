@@ -142,9 +142,9 @@ export default function ReviewSection({ profileAddress }) {
     try {
       const res = await api.get(`/api/reviews/${profileAddress}/check-trade`);
       setIsMutualTrader(res.data.isMutualTrader);
-    } catch {
-      // In demo mode, allow mutual trader for showcasing
-      setIsMutualTrader(true);
+    } catch (err) {
+      console.error("Failed to verify trade:", err);
+      setIsMutualTrader(false);
     } finally {
       setTradeCheckDone(true);
     }
@@ -166,19 +166,9 @@ export default function ReviewSection({ profileAddress }) {
       setUpvotes(res.data.upvotes);
       setDownvotes(res.data.downvotes);
       setCurrentVote(res.data.currentVote);
-    } catch {
-      // Optimistic toggle for demo
-      if (currentVote === type) {
-        setCurrentVote(null);
-        if (type === 'upvote') setUpvotes((p) => Math.max(0, p - 1));
-        else setDownvotes((p) => Math.max(0, p - 1));
-      } else {
-        if (currentVote === 'upvote') setUpvotes((p) => Math.max(0, p - 1));
-        if (currentVote === 'downvote') setDownvotes((p) => Math.max(0, p - 1));
-        setCurrentVote(type);
-        if (type === 'upvote') setUpvotes((p) => p + 1);
-        else setDownvotes((p) => p + 1);
-      }
+    } catch (err) {
+      console.error("Vote failed:", err);
+      alert(err.response?.data?.message || err.response?.data?.error || "Failed to submit vote. Mutual trade required.");
     } finally {
       setVoteLoading(false);
     }
@@ -202,22 +192,9 @@ export default function ReviewSection({ profileAddress }) {
       setFormComment('');
       fetchReviews();
       setTimeout(() => setSubmitSuccess(false), 3000);
-    } catch {
-      // Demo: add locally
-      const newReview = {
-        id: Date.now().toString(),
-        reviewer: walletAddress || '0x0000',
-        reviewerEns: 'you.eth',
-        rating: formRating,
-        comment: formComment.trim(),
-        createdAt: new Date().toISOString(),
-      };
-      setReviews((prev) => [newReview, ...prev]);
-      setSubmitSuccess(true);
-      setShowForm(false);
-      setFormRating(0);
-      setFormComment('');
-      setTimeout(() => setSubmitSuccess(false), 3000);
+    } catch (err) {
+      console.error("Review failed:", err);
+      alert(err.response?.data?.message || err.response?.data?.error || "Failed to submit review. Mutual trade required.");
     } finally {
       setSubmitting(false);
     }

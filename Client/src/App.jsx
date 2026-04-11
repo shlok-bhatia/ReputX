@@ -17,7 +17,7 @@ const SIDEBAR_PAGES = ['/leaderboard', '/profile', '/loans', '/settings'];
 function App() {
   const [walletModalOpen, setWalletModalOpen] = useState(false);
   const location = useLocation();
-  const showSidebar = SIDEBAR_PAGES.includes(location.pathname);
+  const showSidebar = SIDEBAR_PAGES.includes(location.pathname) || location.pathname.startsWith('/profile/');
 
   return (
     <div className="app-wrapper">
@@ -30,6 +30,7 @@ function App() {
             <Routes>
               <Route path="/leaderboard" element={<LeaderBoard />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/profile/:address" element={<Profile />} />
               <Route path="/loans" element={<BankLoans />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>

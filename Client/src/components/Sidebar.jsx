@@ -18,7 +18,7 @@ export default function Sidebar() {
         <div className="sidebar__vault-icon">🛡️</div>
         <div className="sidebar__vault-info">
           <span className="sidebar__vault-title">Vault Access</span>
-          <span className="sidebar__vault-tier">Level 4 Guardian</span>
+          <span className="sidebar__vault-tier">Level 4</span>
         </div>
       </div>
 

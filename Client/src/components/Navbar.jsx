@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useWalletContext } from '../context/WalletContext';
 import { useAuth } from '../context/AuthContext';
 import { formatAddress } from '../config/formatAddress';
@@ -7,8 +7,10 @@ import './Navbar.css';
 
 export default function Navbar({ onConnectClick }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isConnected, walletAddress, disconnect } = useWalletContext();
   const { logout, isAuthenticated } = useAuth();
+  const [searchTerm, setSearchTerm] = useState('');
 
   const navLinks = [
     { path: '/', label: 'Home' },
@@ -19,6 +21,21 @@ export default function Navbar({ onConnectClick }) {
   const handleDisconnect = () => {
     disconnect();
     logout();
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const term = searchTerm.trim();
+    if (term) {
+      if (term.startsWith('0x') && term.length >= 42) {
+        navigate(`/profile/${term}`);
+      } else {
+        // Here we could handle ENS searching if we build a resolution context
+        // For now, if they enter something, we just push it
+        navigate(`/profile/${term}`);
+      }
+      setSearchTerm('');
+    }
   };
 
   return (
@@ -40,11 +57,16 @@ export default function Navbar({ onConnectClick }) {
       </div>
 
       <div className="navbar__right">
-        {(location.pathname === '/leaderboard' || location.pathname === '/profile') && (
-          <div className="navbar__search">
-            <span className="navbar__search-icon">🔍</span>
-            <input type="text" placeholder="Search Vault..." />
-          </div>
+        {(location.pathname === '/leaderboard' || location.pathname.startsWith('/profile')) && (
+          <form className="navbar__search" onSubmit={handleSearch}>
+            <span className="navbar__search-icon" onClick={handleSearch} style={{cursor: 'pointer'}}>🔍</span>
+            <input 
+              type="text" 
+              placeholder="Search Vault (0x...)" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </form>
         )}
 
         {isConnected ? (

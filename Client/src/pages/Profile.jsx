@@ -1,4 +1,5 @@
 import React, { useState, useEffect,useCallback } from 'react';
+import { useParams } from 'react-router-dom';
 import ScoreCard from '../components/ScoreCard';
 import BadgeShelf from '../components/BadgeShelf';
 import ProfileToggle from '../components/ProfileToggle';
@@ -24,12 +25,36 @@ const TIMELINE = [
 ];
 
 export default function Profile() {
+  const { address: paramAddress } = useParams();
   const { walletAddress, ensName } = useWalletContext();
   const { isAuthenticated } = useAuth();
-  const { data, loading } = useReputation(walletAddress);
+  
+  // Use param address if provided, otherwise use current wallet address
+  const profileAddress = paramAddress || walletAddress;
+  const isOwnProfile = profileAddress === walletAddress;
+  
+  const { data, loading } = useReputation(profileAddress);
   const [isPublic, setIsPublic] = useState(false);
   const [privacyUpdating, setPrivacyUpdating] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+
+  // Fetch profile data (including display name, bio, etc.)
+  useEffect(() => {
+    if (!profileAddress) return;
+    
+    const fetchProfile = async () => {
+      try {
+        const res = await api.get(`/api/profile/${profileAddress}`);
+        setProfileData(res.data);
+        setIsPublic(res.data.isPublic || false);
+      } catch (err) {
+        console.warn('Failed to fetch profile data:', err);
+      }
+    };
+    
+    fetchProfile();
+  }, [profileAddress]);
 
   const score  = data?.score !== undefined ? data.score : '-';
   const tier   = data?.tier  || 'NA';
@@ -52,6 +77,8 @@ export default function Profile() {
 
   // Toggle profile visibility via API
   const handleVisibilityToggle = useCallback(async (newValue) => {
+    if (!isOwnProfile) return; // Prevent toggling other profiles
+    
     setIsPublic(newValue);
 
     if (!isAuthenticated) return;
@@ -66,7 +93,7 @@ export default function Profile() {
     } finally {
       setPrivacyUpdating(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isOwnProfile]);
 
   return (
     <>
@@ -104,13 +131,13 @@ export default function Profile() {
         {/* ── Identity Card ── */}
         <div className="identity-card">
           <h2 className="identity-card__name">
-            {ensName || 'vitalik.eth'}
+            {profileData?.ensName || profileData?.displayName || ensName || 'Vault User'}
             <span className="identity-card__verified">✓</span>
           </h2>
           <div className="identity-card__address">
-            <span>{formatAddress(walletAddress || '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045')}</span>
+            <span>{formatAddress(profileAddress || walletAddress || '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045')}</span>
             <button
-              onClick={() => navigator.clipboard.writeText(walletAddress || '')}
+              onClick={() => navigator.clipboard.writeText(profileAddress || walletAddress || '')}
               title="Copy address"
             >
               📋
@@ -130,7 +157,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <ProfileToggle isPublic={isPublic} onToggle={handleVisibilityToggle} />
+          {isOwnProfile && <ProfileToggle isPublic={isPublic} onToggle={handleVisibilityToggle} />}
         </div>
 
         {/* ── Timeline ── */}
@@ -151,7 +178,7 @@ export default function Profile() {
         </div>
 
         {/* ── Peer Reviews & Votes ── */}
-        <ReviewSection profileAddress={walletAddress} />
+        <ReviewSection profileAddress={profileAddress} />
 
         {/* ── Upgrade CTA ── */}
         <div className="upgrade-cta">

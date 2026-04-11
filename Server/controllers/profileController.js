@@ -53,6 +53,10 @@ export async function getProfile(req, res, next) {
       sybilRisk: scoreResult.sybilRisk,
       score: scoreResult.score,
       breakdown: scoreResult.breakdown,
+      displayName: user.displayName,
+      bio: user.bio,
+      email: user.email,
+      twitter: user.twitter,
       badges: badges.map((b) => ({
         type: b.type,
         awardedAt: b.awardedAt,
@@ -67,21 +71,27 @@ export async function getProfile(req, res, next) {
 }
 
 /**
- * PUT /profile/visibility
- * Toggle public/private (JWT required)
+ * PUT /profile/update
+ * Update profile settings (JWT required)
  */
-export async function updateVisibility(req, res, next) {
+export async function updateProfile(req, res, next) {
   try {
     const address = req.user.address;
-    const { isPublic } = req.body;
+    const { isPublic, displayName, bio, email, twitter } = req.body;
 
-    if (typeof isPublic !== "boolean") {
-      return res.status(400).json({ error: "isPublic must be a boolean" });
+    const updateData = {};
+    if (typeof isPublic === "boolean") updateData.isPublic = isPublic;
+    if (displayName !== undefined) {
+      updateData.ensName = displayName;
+      updateData.displayName = displayName;
     }
+    if (bio !== undefined) updateData.bio = bio;
+    if (email !== undefined) updateData.email = email;
+    if (twitter !== undefined) updateData.twitter = twitter;
 
     const user = await User.findOneAndUpdate(
       { address },
-      { isPublic },
+      updateData,
       { returnDocument: 'after' }
     );
 
@@ -155,8 +165,8 @@ export async function getLeaderboard(req, res, next) {
     const avgScore =
       validScores.length > 0
         ? Math.round(
-            validScores.reduce((sum, s) => sum + s.score, 0) / validScores.length
-          )
+          validScores.reduce((sum, s) => sum + s.score, 0) / validScores.length
+        )
         : 0;
 
     // Paginate
@@ -182,4 +192,4 @@ export async function getLeaderboard(req, res, next) {
   }
 }
 
-export default { getProfile, updateVisibility, getLeaderboard };
+export default { getProfile, updateProfile, getLeaderboard };

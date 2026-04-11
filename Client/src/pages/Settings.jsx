@@ -1,17 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useWalletContext } from '../context/WalletContext';
 import { useAuth } from '../context/AuthContext';
 import { formatAddress } from '../config/formatAddress';
 import api from '../config/axios';
 import './Settings.css';
 
-const NOTIFICATION_OPTIONS = [
-  { id: 'score_change', label: 'Score Changes', desc: 'Get notified when your reputation score updates', icon: '📊' },
-  { id: 'badge_earned', label: 'Badge Earned', desc: 'Alerts when you earn a new on-chain badge', icon: '🏅' },
-  { id: 'tier_upgrade', label: 'Tier Upgrades', desc: 'Notification on tier promotion or demotion', icon: '⬆️' },
-  { id: 'weekly_digest', label: 'Weekly Digest', desc: 'A weekly summary of your reputation activity', icon: '📬' },
-  { id: 'security_alerts', label: 'Security Alerts', desc: 'Critical alerts for suspicious wallet activity', icon: '🔐' },
-];
+
 
 const PRIVACY_OPTIONS = [
   { id: 'public_profile', label: 'Public Profile', desc: 'Allow others to view your reputation score', icon: '👁️' },
@@ -31,13 +25,7 @@ export default function Settings() {
   const { isAuthenticated, logout } = useAuth();
 
   // Local state
-  const [notifications, setNotifications] = useState({
-    score_change: true,
-    badge_earned: true,
-    tier_upgrade: true,
-    weekly_digest: false,
-    security_alerts: true,
-  });
+
   const [privacy, setPrivacy] = useState({
     public_profile: true,
     show_badges: true,
@@ -46,13 +34,33 @@ export default function Settings() {
   });
   const [activeTheme, setActiveTheme] = useState('dark');
   const [displayName, setDisplayName] = useState(ensName || '');
+  const [bio, setBio] = useState('');
+  const [email, setEmail] = useState('');
+  const [twitter, setTwitter] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [activeSection, setActiveSection] = useState('profile');
 
-  const handleNotifToggle = (id) => {
-    setNotifications((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
+  // Fetch true profile data on mount
+  useEffect(() => {
+    async function loadProfile() {
+      if (!walletAddress || !isAuthenticated) return;
+      try {
+        const res = await api.get(`/api/profile/${walletAddress}`);
+        const data = res.data;
+        if (data) {
+          setPrivacy((prev) => ({ ...prev, public_profile: data.isPublic }));
+          if (data.displayName) setDisplayName(data.displayName);
+          if (data.bio) setBio(data.bio);
+          if (data.email) setEmail(data.email);
+          if (data.twitter) setTwitter(data.twitter);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch profile info', err);
+      }
+    }
+    loadProfile();
+  }, [walletAddress, isAuthenticated]);
 
   const handlePrivacyToggle = (id) => {
     setPrivacy((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -63,33 +71,38 @@ export default function Settings() {
     setSaved(false);
     try {
       // Attempt to save to backend
-      if (isAuthenticated) {
-        await api.put('/api/profile/visibility', {
+      if (isAuthenticated && walletAddress) {
+        const response = await api.put('/api/profile/update', {
+          address: walletAddress,
           isPublic: privacy.public_profile,
-          showBadges: privacy.show_badges,
-          leaderboardOptIn: privacy.leaderboard_opt,
+          displayName: displayName || '',
+          bio: bio || '',
+          email: email || '',
+          twitter: twitter || ''
         });
+        console.log('Profile updated:', response.data);
+      } else {
+        console.warn('Not authenticated or no wallet address');
       }
       setTimeout(() => {
         setSaving(false);
         setSaved(true);
         setTimeout(() => setSaved(false), 2500);
       }, 600);
-    } catch {
-      // Silently fallback — settings saved locally
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      // Still show success locally even if backend fails
       setSaving(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     }
-  }, [isAuthenticated, privacy]);
+  }, [isAuthenticated, walletAddress, privacy, displayName, bio, email, twitter]);
 
   const SECTIONS = [
     { id: 'profile', label: 'Profile', icon: '👤' },
-    { id: 'notifications', label: 'Notifications', icon: '🔔' },
     { id: 'privacy', label: 'Privacy', icon: '🛡️' },
-    { id: 'appearance', label: 'Appearance', icon: '🎨' },
+    // { id: 'appearance', label: 'Appearance', icon: '🎨' },
     { id: 'wallets', label: 'Wallets', icon: '💳' },
-    { id: 'danger', label: 'Danger Zone', icon: '⚠️' },
   ];
 
   return (
@@ -102,7 +115,7 @@ export default function Settings() {
             {SECTIONS.map(({ id, label, icon }) => (
               <button
                 key={id}
-                className={`settings-nav__item${activeSection === id ? ' active' : ''}${id === 'danger' ? ' settings-nav__item--danger' : ''}`}
+                className={`settings-nav__item${activeSection === id ? ' active' : ''}`}
                 onClick={() => setActiveSection(id)}
               >
                 <span className="settings-nav__item-icon">{icon}</span>
@@ -159,6 +172,8 @@ export default function Settings() {
                     className="settings-field__textarea"
                     placeholder="Tell the community about yourself..."
                     rows={3}
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value.slice(0, 160))}
                   />
                   <span className="settings-field__hint">Max 160 characters. Visible on your public profile.</span>
                 </div>
@@ -170,6 +185,8 @@ export default function Settings() {
                       type="email"
                       className="settings-field__input"
                       placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
                   <div className="settings-field">
@@ -178,6 +195,8 @@ export default function Settings() {
                       type="text"
                       className="settings-field__input"
                       placeholder="@handle"
+                      value={twitter}
+                      onChange={(e) => setTwitter(e.target.value)}
                     />
                   </div>
                 </div>
@@ -185,42 +204,7 @@ export default function Settings() {
             </section>
           )}
 
-          {/* ═══ Notifications Section ═══ */}
-          {activeSection === 'notifications' && (
-            <section className="settings-section fade-in" id="settings-notifications">
-              <div className="settings-section__header">
-                <h3 className="settings-section__title">Notification Preferences</h3>
-                <p className="settings-section__desc">Choose which events you want to be notified about.</p>
-              </div>
 
-              <div className="settings-card">
-                {NOTIFICATION_OPTIONS.map(({ id, label, desc, icon }, idx) => (
-                  <div
-                    className="settings-toggle-row"
-                    key={id}
-                    style={{ animationDelay: `${idx * 0.05}s` }}
-                  >
-                    <div className="settings-toggle-row__left">
-                      <span className="settings-toggle-row__icon">{icon}</span>
-                      <div className="settings-toggle-row__text">
-                        <span className="settings-toggle-row__label">{label}</span>
-                        <span className="settings-toggle-row__desc">{desc}</span>
-                      </div>
-                    </div>
-                    <label className="settings-toggle" htmlFor={`notif-${id}`}>
-                      <input
-                        type="checkbox"
-                        id={`notif-${id}`}
-                        checked={notifications[id]}
-                        onChange={() => handleNotifToggle(id)}
-                      />
-                      <span className="settings-toggle__slider" />
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
 
           {/* ═══ Privacy Section ═══ */}
           {activeSection === 'privacy' && (
@@ -377,51 +361,7 @@ export default function Settings() {
             </section>
           )}
 
-          {/* ═══ Danger Zone ═══ */}
-          {activeSection === 'danger' && (
-            <section className="settings-section fade-in" id="settings-danger">
-              <div className="settings-section__header">
-                <h3 className="settings-section__title settings-section__title--danger">Danger Zone</h3>
-                <p className="settings-section__desc">Irreversible actions. Proceed with extreme caution.</p>
-              </div>
 
-              <div className="settings-card settings-card--danger">
-                <div className="settings-danger-row">
-                  <div className="settings-danger-row__text">
-                    <h4>Reset Reputation Score</h4>
-                    <p>This will wipe your current reputation data and force a full re-calculation from chain history. This process can take up to 24 hours.</p>
-                  </div>
-                  <button className="settings-danger-btn settings-danger-btn--secondary">
-                    Reset Score
-                  </button>
-                </div>
-
-                <div className="settings-divider settings-divider--danger" />
-
-                <div className="settings-danger-row">
-                  <div className="settings-danger-row__text">
-                    <h4>Export Account Data</h4>
-                    <p>Download a full export of your profile, reputation history, and badges data in JSON format.</p>
-                  </div>
-                  <button className="settings-danger-btn settings-danger-btn--neutral">
-                    Export Data
-                  </button>
-                </div>
-
-                <div className="settings-divider settings-divider--danger" />
-
-                <div className="settings-danger-row">
-                  <div className="settings-danger-row__text">
-                    <h4>Delete Account</h4>
-                    <p>Permanently remove your ReputX identity. Your on-chain data remains, but all reputation history will be purged.</p>
-                  </div>
-                  <button className="settings-danger-btn settings-danger-btn--destructive">
-                    Delete Account
-                  </button>
-                </div>
-              </div>
-            </section>
-          )}
 
           {/* ── Save Bar ── */}
           <div className="settings-save-bar" id="settings-save-bar">

@@ -25,7 +25,7 @@ export function useENS(address) {
         // Fallback mock ENS lookup if backend is unavailable
         if (!cancelled) {
           const mock = {
-            '0x71c7656ec7ab88b098defb751b7401b5f6d8976f': 'guardian.eth',
+            '0xaa1ce0000000000000000000000000000000001': 'tanmay.eth',
             '0xd8da6bf26964af9d7eed9e03e53415d37aa96045': 'vitalik.eth',
           };
           setEnsName(mock[address.toLowerCase()] || null);
