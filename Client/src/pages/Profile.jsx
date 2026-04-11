@@ -62,6 +62,15 @@ export default function Profile() {
   const sybil  = data?.sybilRisk || 'NA';
   const breakdown = data?.breakdown || {};
 
+  const formatWalletAge = (dateString) => {
+    if (!dateString) return 'NA';
+    const days = Math.floor((new Date() - new Date(dateString)) / (1000 * 60 * 60 * 24));
+    if (days < 1) return 'New';
+    if (days < 30) return `${days}d`;
+    if (days < 365) return `${Math.floor(days / 30)}mo`;
+    return `${(days / 365).toFixed(1)}y`;
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowModal(true);
@@ -147,7 +156,7 @@ export default function Profile() {
           <div className="identity-card__stats">
             <div>
               <div className="identity-stat__label">Wallet Age</div>
-              <div className="identity-stat__value">NA</div>
+              <div className="identity-stat__value">{formatWalletAge(profileData?.memberSince)}</div>
             </div>
             <div>
               <div className="identity-stat__label">Sybil Risk</div>
