@@ -75,19 +75,5 @@ export function useReputation(address) {
     fetchReputation();
   }, [fetchReputation]);
 
-  /**
-   * Apply a real-time score update from Socket.io
-   */
-  const applyRealtimeUpdate = useCallback((update) => {
-    setData(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        score: update.score ?? prev.score,
-        tier: update.tier ?? prev.tier,
-      };
-    });
-  }, []);
-
-  return { data, loading, error, refetch: fetchReputation, applyRealtimeUpdate };
+  return { data, loading, error, refetch: fetchReputation };
 }

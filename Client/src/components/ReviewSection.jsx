@@ -107,7 +107,7 @@ export default function ReviewSection({ profileAddress }) {
   const fetchReviews = useCallback(async () => {
     setReviewsLoading(true);
     try {
-      const addr = profileAddress || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+      const addr = profileAddress || import.meta.env.VITE_MY_WALLET;
       const res = await api.get(`/api/reviews/${addr}`);
       setReviews(res.data.reviews || []);
     } catch {
@@ -121,7 +121,7 @@ export default function ReviewSection({ profileAddress }) {
   // ── Fetch vote summary ──
   const fetchVotes = useCallback(async () => {
     try {
-      const addr = profileAddress || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+      const addr = profileAddress || import.meta.env.VITE_MY_WALLET;
       const res = await api.get(`/api/reviews/${addr}/vote-summary`);
       setUpvotes(res.data.upvotes || 0);
       setDownvotes(res.data.downvotes || 0);
@@ -161,7 +161,7 @@ export default function ReviewSection({ profileAddress }) {
     if (!isAuthenticated || isSelf) return;
     setVoteLoading(true);
     try {
-      const addr = profileAddress || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+      const addr = profileAddress || import.meta.env.VITE_MY_WALLET;
       const res = await api.post(`/api/reviews/${addr}/vote`, { type });
       setUpvotes(res.data.upvotes);
       setDownvotes(res.data.downvotes);
@@ -191,7 +191,7 @@ export default function ReviewSection({ profileAddress }) {
 
     setSubmitting(true);
     try {
-      const addr = profileAddress || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+      const addr = profileAddress || import.meta.env.VITE_MY_WALLET;
       await api.post(`/api/reviews/${addr}`, {
         rating: formRating,
         comment: formComment.trim(),

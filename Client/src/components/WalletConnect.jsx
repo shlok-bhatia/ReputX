@@ -36,7 +36,7 @@ export default function WalletConnect({ onClose, hideClose = false }) {
         });
         address = accounts[0];
       } else {
-        address = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F'; // mock fallback
+        address = import.meta.env.VITE_MY_WALLET; // mock fallback
       }
 
       // Update wallet context with the resolved address

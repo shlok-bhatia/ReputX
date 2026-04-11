@@ -15,7 +15,7 @@ const MOCK_ENTRIES = [
   { rank: 8,  ens: 'yield-hunter.eth',  address: '0x6789012345678901234567890123456789012345', score: 885,  change: +7  },
   { rank: 9,  ens: 'tx-phantom.eth',    address: '0x7890123456789012345678901234567890123456', score: 872,  change: 0   },
   { rank: 10, ens: 'dao-sentinel.eth',  address: '0x8901234567890123456789012345678901234567', score: 868,  change: +2  },
-  { rank: 42, ens: 'guardian.eth',       address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F', score: 841,  change: +15, isYou: true },
+  { rank: 42, ens: 'guardian.eth',       address: import.meta.env.VITE_MY_WALLET, score: 841,  change: +15, isYou: true },
   { rank: 43, ens: 'satoshi-fan.eth',   address: '0xDEAD000000000000000000000000000000000BEEF', score: 838,  change: -1  },
 ];
 
