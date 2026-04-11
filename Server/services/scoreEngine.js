@@ -457,6 +457,12 @@ export async function calculateScore({
   return {
     score,
     tier,
+    stats: {
+      transactionCount: totalTransactions,
+      uniqueContracts: uniqueContracts,
+      nftHoldings: nftData?.total || 0,
+      daoVotes: daoVotes,
+    },
     breakdown: {
       walletAge:        ageResult.points,
       ...baseBreakdown,
@@ -532,13 +538,24 @@ export async function calculateScoreFromDB(address) {
   }
 
   // ── DAO votes from Vote model ──────────
-  const daoVoteCount = await Vote.countDocuments({ voter: addr });
+  // Count both votes cast by user and votes received by user to reflect community engagement in DAOs/Peer Reviews
+  const daoVoteCount = await Vote.countDocuments({
+    $or: [{ voter: addr }, { target: addr }],
+  });
 
   // ── ENS name ────────────────────────────
   const ensName = user?.ensName || null;
 
   // ── Sybil risk from user doc ────────────
   const sybilRisk = user?.sybilRisk || "NONE";
+
+  // ── Stats object to return raw counts ───
+  const stats = {
+    transactionCount: transactions.total,
+    uniqueContracts: uniqueCounterparties,
+    nftHoldings: nftData.total,
+    daoVotes: daoVoteCount,
+  };
 
   // ── Base Factors ────────────────────────
   const baseBreakdown = scoreBaseFactors({
@@ -597,6 +614,7 @@ export async function calculateScoreFromDB(address) {
     tier,
     sybilRisk,
     ensName,
+    stats,
     breakdown: {
       walletAge:        ageResult.points,
       ...baseBreakdown,
