@@ -347,7 +347,7 @@ export default function Settings() {
                     </div>
                     <div className="settings-wallet-row__info">
                       <span className="settings-wallet-row__addr">
-                        {formatAddress(walletAddress || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F')}
+                        {formatAddress(walletAddress || import.meta.env.VITE_MY_WALLET)}
                       </span>
                       <span className="settings-wallet-row__meta">
                         MetaMask · {isConnected ? 'Connected' : 'Disconnected'}

@@ -88,16 +88,6 @@ export async function recalculateReputation(req, res, next) {
       { returnDocument: 'after' }
     );
 
-    // Emit real-time update via Socket.io
-    const io = req.app.get("io");
-    if (io) {
-      io.to(address).emit("score:updated", {
-        address,
-        score: result.score,
-        tier: result.tier,
-      });
-    }
-
     const badges = await Badge.find({ address }).lean();
 
     return res.json({

@@ -2,11 +2,11 @@
   "name": "server",
   "version": "1.0.0",
   "description": "ReputX Backend API Server",
-  "main": "SocketServer.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node SocketServer.js",
-    "dev": "node --watch SocketServer.js",
+    "start": "node server.js",
+    "dev": "node --watch server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -24,8 +24,8 @@
     "express-rate-limit": "^8.3.2",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.1.1",
     "mongoose": "^9.4.1",
-    "node-cron": "^4.2.1",
-    "socket.io": "^4.8.0"
+    "node-cron": "^4.2.1"
   }
 }

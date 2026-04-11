@@ -34,7 +34,7 @@ export function WalletProvider({ children }) {
         return account;
       } else {
         // Fallback mock wallet for demo when MetaMask is not installed
-        const mockAddress = address || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
+        const mockAddress = address || import.meta.env.VITE_MY_WALLET;
         setWalletAddress(mockAddress);
         setEnsName('guardian.eth');
         setIsConnected(true);
