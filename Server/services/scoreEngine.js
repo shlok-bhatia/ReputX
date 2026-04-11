@@ -5,9 +5,7 @@ import Review from "../models/Review.model.js";
 import Trade from "../models/Trade.model.js";
 import Badge from "../models/Badge.model.js";
 
-// ─────────────────────────────────────────────
-//  BLACKLISTED / SCAM CONTRACT ADDRESSES
-// ─────────────────────────────────────────────
+
 const BLACKLISTED_CONTRACTS = new Set([
   "0xscam1111111111111111111111111111111111111",
   "0xrug2222222222222222222222222222222222222",
@@ -15,9 +13,7 @@ const BLACKLISTED_CONTRACTS = new Set([
   // Add more as needed
 ]);
 
-// ─────────────────────────────────────────────
-//  TIER THRESHOLDS
-// ─────────────────────────────────────────────
+
 function getTier(score) {
   if (score >= 800) return "OG";
   if (score >= 600) return "Trusted";
@@ -26,9 +22,7 @@ function getTier(score) {
   return "Anon";
 }
 
-// ─────────────────────────────────────────────
-//  HELPERS
-// ─────────────────────────────────────────────
+
 function daysBetween(dateA, dateB) {
   return Math.abs(new Date(dateA) - new Date(dateB)) / (1000 * 60 * 60 * 24);
 }
@@ -40,9 +34,7 @@ function stdDev(arr) {
   return Math.sqrt(variance);
 }
 
-// ─────────────────────────────────────────────
-//  RULE 1 — WALLET AGE BASE SCORE
-// ─────────────────────────────────────────────
+
 function scoreWalletAge(walletAgeDays) {
   if (!walletAgeDays) return { points: 0, reason: "No wallet age data" };
   if (walletAgeDays >= 1095) return { points: 150, reason: "Wallet age > 3 years" };
@@ -53,11 +45,7 @@ function scoreWalletAge(walletAgeDays) {
   return { points: 0, reason: "Wallet too new" };
 }
 
-// ─────────────────────────────────────────────
-//  RULE 2 — INACTIVITY DECAY
-//  30-day gap  → -100
-//  90-day gap  → -200
-// ─────────────────────────────────────────────
+
 function scoreInactivity(transactions) {
   if (!transactions?.list?.length) return { points: 0, reason: "No transactions" };
 
@@ -71,7 +59,7 @@ function scoreInactivity(transactions) {
     if (gap > maxGap) maxGap = gap;
   }
 
-  // Also check gap from last tx to now
+  
   if (sorted.length > 0) {
     const daysSinceLast = daysBetween(
       new Date(),
@@ -85,10 +73,7 @@ function scoreInactivity(transactions) {
   return { points: 0, reason: "No significant inactivity gap" };
 }
 
-// ─────────────────────────────────────────────
-//  RULE 3 — ABNORMAL SPIKE DETECTION
-//  A single tx > 5× the user's median tx value → -150
-// ─────────────────────────────────────────────
+
 function scoreAbnormalSpike(transactions) {
   if (!transactions?.list?.length) return { points: 0, reason: "No transaction data" };
 
@@ -111,10 +96,7 @@ function scoreAbnormalSpike(transactions) {
   return { points: 0, reason: "No abnormal spike detected" };
 }
 
-// ─────────────────────────────────────────────
-//  RULE 4 — SAME PATTERN DETECTION
-//  Same contracts + same time windows (bot-like) → -250
-// ─────────────────────────────────────────────
+
 function scoreSamePattern(transactions) {
   if (!transactions?.list?.length) return { points: 0, reason: "No transactions" };
 
@@ -156,10 +138,7 @@ function scoreSamePattern(transactions) {
   return { points: 0, reason: "No suspicious patterns detected" };
 }
 
-// ─────────────────────────────────────────────
-//  RULE 5 — TRANSACTION CONSISTENCY BONUS  +200
-//  Active for 6+ consecutive months
-// ─────────────────────────────────────────────
+
 function scoreConsistency(transactions) {
   if (!transactions?.list?.length) return { points: 0, reason: "No transactions" };
 
@@ -191,9 +170,7 @@ function scoreConsistency(transactions) {
   return { points: 0, reason: `Max streak: ${maxStreak} month(s)` };
 }
 
-// ─────────────────────────────────────────────
-//  RULE 6 — SCAM / BLACKLISTED CONTRACT  -150
-// ─────────────────────────────────────────────
+
 function scoreScamInteraction(transactions) {
   if (!transactions?.list?.length) return { points: 0, reason: "No transactions" };
 
@@ -211,10 +188,7 @@ function scoreScamInteraction(transactions) {
   return { points: 0, reason: "No blacklisted contract interaction" };
 }
 
-// ─────────────────────────────────────────────
-//  RULE 7 — DAO MISBEHAVIOUR (spam votes)  -100
-//  Votes more than 20 times in a 24h window = spam
-// ─────────────────────────────────────────────
+
 async function scoreDAOMisbehaviour(address) {
   // Check platform Vote model (upvote/downvote spam)
   const votes = await Vote.find({ voter: address.toLowerCase() })
@@ -242,10 +216,7 @@ async function scoreDAOMisbehaviour(address) {
   return { points: 0, reason: "No DAO spam detected" };
 }
 
-// ─────────────────────────────────────────────
-//  RULE 8 — NFT DUMP BEHAVIOUR  -100
-//  Buys NFT and sells within 24h repeatedly (3+ times)
-// ─────────────────────────────────────────────
+
 async function scoreDumpBehaviour(address, nftData) {
   // Use Trade model to detect quick flips
   const trades = await Trade.find({
@@ -282,11 +253,7 @@ async function scoreDumpBehaviour(address, nftData) {
   return { points: 0, reason: "No dump behaviour detected" };
 }
 
-// ─────────────────────────────────────────────
-//  RULE 9 — TIME-BASED DECAY  -150
-//  Applied if score hasn't been refreshed in 90 days
-//  AND user has no recent tx activity
-// ─────────────────────────────────────────────
+
 async function scoreTimeDecay(address) {
   const existing = await ReputationScore.findOne({
     address: address.toLowerCase(),
@@ -304,9 +271,7 @@ async function scoreTimeDecay(address) {
   return { points: 0, reason: "Score is recent — no decay" };
 }
 
-// ─────────────────────────────────────────────
-//  RULE 10 — BASE FACTORS (original engine)
-// ─────────────────────────────────────────────
+
 function scoreBaseFactors({ totalTransactions, uniqueContracts, nftData, daoVotes, ensName }) {
   const breakdown = {};
 
@@ -512,11 +477,7 @@ export async function calculateScore({
   };
 }
 
-// ─────────────────────────────────────────────
-//  DB-ONLY SCORE CALCULATION
-//  Calculates score from seeded/stored DB data
-//  without calling any external APIs.
-// ─────────────────────────────────────────────
+
 import User from "../models/User.model.js";
 
 export async function calculateScoreFromDB(address) {
