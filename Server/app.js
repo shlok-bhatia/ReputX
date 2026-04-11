@@ -16,18 +16,41 @@ import errorHandler from "./middleware/errorHandler.js";
 
 const app = express();
 
-// Security headers
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
+
+const allowedOrigins = [
+  process.env.CLIENT_ORIGIN || "http://localhost:5173",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://reputx.aalsicoders.in",
+];
 
 // CORS — allow frontend origin
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        console.log("❌ Blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
+    optionsSuccessStatus: 200,
   })
 );
+
+app.options("*", cors());
 
 // Body parsers
 app.use(express.json({ limit: "10kb" }));
